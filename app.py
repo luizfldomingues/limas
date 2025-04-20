@@ -94,7 +94,6 @@ def edit_order():
         actual_products = list_products(order)[int(order_id)]
         # Populates the intended products list
         for actual_product in actual_products:
-            print(f"\n\n\nproduct: {actual_product}\n\n\n")
             if request.form.get(str(actual_product["id"])):
                     if request.form.get(str(actual_product["id"])).isnumeric():
                         intended_products[actual_product["id"]] = int(request.form.get(str((actual_product["id"]))))
@@ -158,14 +157,14 @@ def order_details():
 
 
 
-@app.route("/history", methods=["GET", "POST"])
+@app.route("/history")
 @login_required
 def history():
-    if request.method == "POST":
+    if request.args:
         total_sold = 0
-        if request.form.get('date-range').isdigit():
-            since_date = db.execute(f"SELECT DATE(DATETIME(current_date, '-3 hours'), '-{request.form.get('date-range')} days') AS date")[0]["date"]
-            orders = db.execute(f"SELECT *, DATETIME(order_time, '-3 hours') AS order_timef FROM orders WHERE order_time BETWEEN DATETIME(DATETIME(current_date, '-3 hours'), '-{request.form.get('date-range')} days') AND current_timestamp ORDER BY order_time DESC")
+        if request.args.get('date-range').isdigit():
+            since_date = db.execute(f"SELECT DATE(DATETIME(current_date, '-3 hours'), '-{request.args.get('date-range')} days') AS date")[0]["date"]
+            orders = db.execute(f"SELECT *, DATETIME(order_time, '-3 hours') AS order_timef FROM orders WHERE order_time BETWEEN DATETIME(DATETIME(current_date, '-3 hours'), '-{request.args.get('date-range')} days') AND current_timestamp ORDER BY order_time DESC")
         else:
             orders = db.execute(f"SELECT *, DATETIME(order_time, '-3 hours') AS order_timef FROM orders ORDER BY order_time DESC")
             since_date = "Sempre"

@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Registrar
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <form action="/register" method="post">
+        <div class="p-1 m-1">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Usuário" type="text">
+        </div>
+        <div class="p-1 m-1">
+            <input autocomplete="off" class="form-control mx-auto w-auto" name="password" placeholder="Senha" type="password">
+        </div>
+        <div class="p-1 m-1">
+            <input autocomplete="off" class="form-control mx-auto w-auto" name="confirmation" placeholder="Confirme a senha" type="password">
+        </div>
+        <div class="p-1 m-1">
+            <button class="border btn btn-default" type="submit">Registrar</button>
+        </div>
+    </form>
+</div>
+<div class="p-1 m-1">
+<p>
+    Já possui uma conta? Entre <a href="/login">aqui</a>
+</p>
+</div>
+{% endblock %}

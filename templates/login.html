@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Entrar
+{% endblock %}
+
+{% block main %}
+<div class="container">
+    <form action="/login" method="post">
+        <div class="p-1 m-1">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Usuário" type="text">
+        </div>
+        <div class="p-1 m-1">
+            <input autocomplete="off" class="form-control mx-auto w-auto" name="password" placeholder="Senha" type="password">
+        </div>
+        <div class="p-1 m-1">
+            <button class="border btn btn-default" type="submit">Entrar</button>
+        </div>
+    </form>
+</div>
+<div class="p-1 m-1">
+<p>
+    Ainda não tem a sua conta? Crie uma <a href="/register">aqui</a>
+</p>
+</div>
+{% endblock %}

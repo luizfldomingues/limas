@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Página Inicial
+{% endblock %}
+
+{% block main %}
+    <div class="py-1 my-1">
+        {% if orders %}
+        {% for order in orders %}
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr class="table-primary">
+                    <th colspan="3">Pedido N.º{{ order.id }}
+                        {% if order.table_number %}
+                        - Mesa {{ order.table_number }}
+                        {% endif %}
+                        {% if order.customer_name %}
+                        - {{ order.customer_name | capitalize }}
+                        {% endif %}
+                    </th>
+                </tr>
+                {% if order_products[order.id] %}
+                <tr>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Preço</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for product in order_products[order.id] %}
+            <tr>
+                <td>{{ product.product_name | capitalize }}</td>
+                <td>{{ product.quantity }}</td>
+                <td>{{ product.current_price | brl }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <th colspan="2" class="align-right">Total:</th>
+                <th>{{ order.total | brl }}</th>
+            </tr>
+            </tbody>
+                {% else %}
+            </thead>
+                {% endif %}
+
+        <tfoot>
+            <tr>
+                <td colspan="3">
+                    <form action="/order-details" method="get">
+                        <input type="hidden" name="order-id" value="{{ order.id }}">
+                        <button class="border btn btn-alert" type="submit">Detalhes</button>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td class="p-0 b-0" colspan="3">
+                    <div class="mx-auto">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <td>
+                                    <form action="/" method="post">
+                                        <input type="hidden" name="finish-order" value="{{ order.id }}">
+                                        <button class="border btn btn-danger mx-auto" type="submit">Finalizar</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="/edit-order" method="get">
+                                        <input type="hidden" name="order-id" value="{{ order.id }}">
+                                        <button class="border btn btn-warning" type="submit">Editar</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="/increment-order" method="get">
+                                        <input type="hidden" name="order-id" value="{{ order.id }}">
+                                        <button class="border btn btn-success" type="submit">Incrementar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+            </tr>
+        </tfoot>
+        </table>
+    {% endfor %}
+    </div>
+    {% else %}
+    <div class="m-3">
+        <h3>Sem pedidos por aqui</h3>
+        <h4><a class="link-underline-opacity-0" href="/new-order">Novo pedido</a></h4>
+    </div>
+    {% endif %}
+
+{% endblock %}

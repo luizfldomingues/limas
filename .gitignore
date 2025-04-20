@@ -1,0 +1,6 @@
+# ignore all .db files in the current directory
+*.db
+
+# ignore __pycache__ and flask_session file created when the program runs
+__pycache__
+flask_session

@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Detalhes pedido N.º{{ order.id }}
+{% endblock %}
+
+{% block main %}
+    <div class="py-1 my-1">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr class="table-primary">
+                    <th colspan="3">Pedido N.º{{ order.id }}
+                        {% if order.table_number %}
+                        - Mesa {{ order.table_number }}
+                        {% endif %}
+                        {% if order.customer_name %}
+                        - {{ order.customer_name | capitalize }}
+                        {% endif %}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th class="align-right">Criado por:</th>
+                    <td>{{ details.username }}</td>
+                </tr>
+                <tr>
+                    <th class="align-right">Criado em:</th>
+                    <td>{{ details.time }}</td>
+                </tr>               <tr>
+                    <th class="align-right">Situação:</th>
+                    <td>{% if details.status == "pending" %}
+                        Pedente
+                        {% else %}
+                        Finalizado
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th class="align-right">Total:</th>
+                    <td>{{ details.total | brl }}</td>
+                </tr>
+            </tbody>
+        <tfoot>
+            <tr>
+                <td class="p-0 b-0" colspan="3">
+                    <div class="mx-auto">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <td>
+                                    <form action="/delete-order" method="get">
+                                        <input type="hidden" name="order-id" value="{{ order.id }}">
+                                        <button class="border btn btn-danger" type="submit">Apagar pedido</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+            </tr>
+        </tfoot>
+        </table>
+
+        {% for increment in increments %}
+        <div class="py-1 my-1">
+            <table class="table table-bordered table-striped">
+                <thead class="table-success">
+                    <th colspan="3">Incremento N.º{{ increment.id }}</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th colspan="2" class="align-right">Incrementado por:</th>
+                        <td>{{ increment.username }}</td>
+                    </tr>
+                    <tr>
+                        <th colspan="2" class="align-right">Incrementado em:</th>
+                        <td>{{ increment.increment_time }}</td>
+                    </tr>
+                    {% if increment.products %}
+                        <tr>
+                            <th>Produto</th>
+                            <th>Quantidade</th>
+                            <th>Preço</th>
+                        </tr>
+                        {% for product in increment.products %}
+                            <tr>
+                                <td>{{ product.product_name | capitalize }}</td>
+                                <td>{{ product.quantity }}</td>
+                                <td>{{ product.current_price | brl }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <th colspan="2">Total:</th>
+                            <td>{{ increment.total | brl}}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            {% endfor %}
+
+{% endblock %}

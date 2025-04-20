@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Histórico
+{% endblock %}
+
+{% block main %}
+<h3>Selecione o período desejado</h3>
+<form action="/history" method="post">
+    <div class="form-group m-3">
+        <select class="form-control" id="date-range" name="date-range">
+            <option value="0">Hoje</option>
+            {% for day in range(1, 30) %}
+            <option value="{{ day }}">{{ day + 1 }} dias</option>
+            {% endfor %}
+            <option value="ever">Sempre</option>
+        </select>
+    </div>
+    <div class="m-3">
+        <button class="border btn btn-primary" type="submit">Buscar histórico</button>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Novo Pedido
+{% endblock %}
+
+{% block main %}
+    <form action="/new-order" method="post">
+        <div class="p-1 m-1 mx-auto">
+            <table class="mx-auto">
+                <tr>
+                    <td>
+                        <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="table-number" placeholder="Nº da mesa" style="max-width: 7rem;" type="number">
+                    </td>
+                    <td>
+                        <input autocomplete="off" class="form-control mx-auto w-auto" name="customer" placeholder="Nome do cliente"  style="max-width: 9rem;" type="text">
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="py-1 my-1">
+            <table class="table table-bordered table-striped">
+            {% for type in products %}
+                <thead class="thead-dark">
+                    <tr>
+                        <th colspan="3">{{ type.type | capitalize }}</th>
+                    </tr>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Preço</th>
+                        <th>Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for product in type.products %}
+                <tr>
+                    <td>{{product.product_name | capitalize }}</td>
+                    <td>{{ product.price | brl }}</td>
+                    <td>
+                            <div class="mx-auto" style="max-width: 4rem;">
+                            <input class="form-control" name="{{ product.id }}" style="max-width: 4rem;" type="number">
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+        {% endfor %}
+            </table>
+        </div>
+        <button class="border btn btn-primary" type="submit">Registrar Pedido</button>
+    </form>
+{% endblock %}

@@ -162,24 +162,20 @@ def delete_order():
 @app.route("/history")
 @login_required
 def history():
-    # TODO: Fix: When querying in a day interval, doesn't cover the correct interval
-    # TODO: Fix: the f string in the requests may lead to sql injection attack
     if request.args:
         total_sold = 0
-        if request.args.get('date-range').isdigit():
+        date_range = request.args.get("date-range")
+        if date_range.isdigit():
             since_date = db.execute("SELECT DATE("
-                                    "DATETIME(current_date, '-3 hours'), "
-                                    f"'-{request.args.get('date-range')} "
-                                    "days') "
-                                    "AS date")[0]["date"]
+                                    "DATETIME(current_timestamp, '-3 hours'), "
+                                    "'-' || ? || ' days') "
+                                    "AS date",
+                                    date_range)[0]["date"]
             orders = db.execute("SELECT *, DATETIME(order_time, '-3 hours') "
                                 "AS order_timef "
                                 "FROM orders "
-                                "WHERE order_time BETWEEN "
-                                "DATETIME(DATETIME(current_date, '-3 hours'), "
-                                f"'-{request.args.get('date-range')} days') "
-                                "AND current_timestamp "
-                                "ORDER BY order_time DESC")
+                                "WHERE order_timef >= ? "
+                                "ORDER BY order_time DESC", since_date)
         else:
             orders = db.execute("SELECT *, DATETIME(order_time, '-3 hours') "
                                 "AS order_timef FROM orders "

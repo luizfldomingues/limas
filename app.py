@@ -284,6 +284,11 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
+@app.route("/manage")
+@login_required
+def manage():
+    return apology("TODO")
+
 
 @app.route("/new-order", methods=["GET", "POST"])
 @login_required

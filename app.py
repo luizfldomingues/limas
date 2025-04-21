@@ -180,10 +180,12 @@ def history():
                                 "AS order_timef "
                                 "FROM orders "
                                 "WHERE order_timef >= ? "
+                                "AND order_status = 'completed' "
                                 "ORDER BY order_time DESC", since_date)
         else:
             orders = db.execute("SELECT *, DATETIME(order_time, '-3 hours') "
                                 "AS order_timef FROM orders "
+                                "WHERE order_status = 'completed' "
                                 "ORDER BY order_time DESC")
             since_date = "Sempre"
         order_products = list_products(orders)

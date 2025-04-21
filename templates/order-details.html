@@ -29,7 +29,8 @@ Detalhes pedido N.º{{ order.id }}
                     <td>{{ details.time }}</td>
                 </tr>               <tr>
                     <th class="align-right">Situação:</th>
-                    <td>{% if details.status == "pending" %}
+                    <td>
+						{% if details.status == "pending" %}
                         Pedente
                         {% else %}
                         Finalizado
@@ -54,6 +55,7 @@ Detalhes pedido N.º{{ order.id }}
                                         <button class="border btn btn-danger" type="submit">Apagar</button>
                                     </form>
                                 </td>
+								{% if order.order_status == "completed" %}
                                 <td>
                                     <form action="/modify-order-status" method="post">
                                         <input type="hidden" name="action" value="reopen">
@@ -61,6 +63,7 @@ Detalhes pedido N.º{{ order.id }}
                                         <button class="border btn btn-warning" type="submit">Reabrir</button>
                                     </form>
                                 </td>
+								{% endif %}
                             </tr>
                         </table>
                     </div>

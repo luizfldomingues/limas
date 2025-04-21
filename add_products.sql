@@ -19,4 +19,6 @@ VALUES
 	('sundae G', 3, 1100),
 
 	('acréscimo', 4, 100),
-	('água', 4, 300);
+	('água', 4, 300),
+	('canudo wafer', 4, 50);
+

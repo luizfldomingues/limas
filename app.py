@@ -33,10 +33,17 @@ def after_request(response):
 def add_order_products(order_id, increment_products):
     if len(increment_products) == 0:
         return
-    order_increment_id = db.execute("INSERT INTO order_increments (order_id, user_id) VALUES (?, ?)", order_id, session["user_id"])
+    order_increment_id = db.execute("INSERT INTO order_increments "
+    "(order_id, user_id) VALUES (?, ?)", order_id, session["user_id"])
     for product in increment_products:
-        price = db.execute("SELECT price FROM products WHERE id = ?", product["id"])[0]["price"]
-        db.execute("INSERT INTO order_products (order_id, product_id, order_increment_id, quantity, current_price) VALUES (?, ?, ?, ?, ?)", order_id, product["id"], order_increment_id, product["quantity"], price)
+        price = db.execute("SELECT price FROM products WHERE id = ?",
+                           product["id"])[0]["price"]
+        db.execute("INSERT INTO order_products "
+                   "(order_id, product_id, order_increment_id, "
+                   "quantity, current_price)"
+                   "VALUES (?, ?, ?, ?, ?)",
+                   order_id, product["id"], order_increment_id,
+                   product["quantity"], price)
     return
 # When receiving a list of orders, returns the products of those orders
 def list_products(orders):
@@ -44,7 +51,14 @@ def list_products(orders):
     order_products = {}
     for order in orders:
         order_products[order["id"]] = db.execute(
-            "SELECT * FROM (SELECT order_products.product_id AS id, SUM(quantity) AS quantity, current_price, products.product_name FROM order_products JOIN products ON order_products.product_id = products.id WHERE order_id = ? GROUP BY order_products.product_id ORDER BY products.product_type_id, price) WHERE quantity > 0", order["id"])
+            "SELECT * FROM "
+            "(SELECT order_products.product_id AS id, "
+            "SUM(quantity) AS quantity, current_price, "
+            "products.product_name FROM order_products JOIN products "
+            "ON order_products.product_id = products.id WHERE order_id = ? "
+            "GROUP BY order_products.product_id "
+            "ORDER BY products.product_type_id, price) WHERE quantity > 0",
+            order["id"])
         total = 0
         for product in order_products[order["id"]]:
             total += product.get("quantity") * product.get("current_price")
@@ -59,17 +73,24 @@ def index():
     if request.method == "POST":
         try:
             if request.form.get("finish-order"):
-                db.execute("UPDATE orders SET order_status = 'completed' WHERE id = ?", request.form.get("finish-order"))
-                flash(f"Pedido N.º {request.form.get("finish-order")} finalizado")
+                db.execute("UPDATE orders "
+                "SET order_status = 'completed' WHERE id = ?", 
+                           request.form.get("finish-order"))
+                flash(f"Pedido N.º {request.form.get("finish-order")} "
+                      "finalizado com sucesso")
         except:
             return apology("Algo deu errado com a mudança do status do pedido")
         return redirect("/")
     # User reached route via GET
     else:
         # Request the list of pending orders and the list of products
-        pending_orders = db.execute("SELECT * FROM orders WHERE order_status = 'pending' ORDER BY id DESC")
+        pending_orders = db.execute("SELECT * FROM orders "
+                                    "WHERE order_status = 'pending' "
+                                    "ORDER BY id DESC")
         order_products = list_products(pending_orders)
-        return render_template("index.html", orders=pending_orders, order_products=order_products)
+        return render_template("index.html",
+                               orders=pending_orders, 
+                               order_products=order_products)
 
 
 @app.route("/edit-order", methods=["GET", "POST"])
@@ -95,17 +116,21 @@ def edit_order():
         # Populates the intended products list
         for actual_product in actual_products:
             if request.form.get(str(actual_product["id"])):
-                    if request.form.get(str(actual_product["id"])).isnumeric():
-                        intended_products[actual_product["id"]] = int(request.form.get(str((actual_product["id"]))))
+                if request.form.get(str(actual_product["id"])).isnumeric():
+                    intended_products[actual_product["id"]] =
+                    int(request.form.get(str((actual_product["id"]))))
                     else:
                         intended_products[actual_product["id"]] = 0
         # Populates the increment_products list
         for actual_product in actual_products:
             if type(intended_products.get(actual_product["id"])) != None:
-                quantity = (intended_products[actual_product["id"]]-int(actual_product["quantity"]))
+                quantity = (intended_products[actual_product["id"]] -
+                            int(actual_product["quantity"]))
                 if quantity != 0:
-                    increment_products.append({"id": actual_product["id"], "quantity": quantity})
-        db.execute("UPDATE orders SET customer_name = ?, table_number = ? WHERE id = ?", customer, table, order_id)
+                    increment_products.append({"id": actual_product["id"],
+                                               "quantity": quantity})
+        db.execute("UPDATE orders SET customer_name = ?, table_number = ? "
+                   "WHERE id = ?", customer, table, order_id)
         add_order_products(order_id, increment_products)
         flash(f"Pedido Nº.{order_id} editado com sucesso")
         return redirect("/")
@@ -116,20 +141,22 @@ def edit_order():
         if len(order) != 1:
             return apology("Pedido não encontrado")
         order_products = list_products(order)
-        return render_template("edit-order.html", order=order[0], order_products=order_products[int(order_id)])
+        return render_template("edit-order.html", order=order[0],
+                               order_products=order_products[int(order_id)])
 
 @app.route("/delete-order")
 @login_required
 def delete_order():
     order_id = request.args.get("order-id")
-    order = db.execute("SELECT order_status FROM orders WHERE id = ?", order_id)
+    order = db.execute("SELECT order_status FROM orders WHERE id = ?",
+                       order_id)
     if len(order) != 1:
         return apology("Não foi possível encontrar o pedido")
     order = order[0]
     db.execute("DELETE FROM order_products WHERE order_id = ?", order_id)
     db.execute("DELETE FROM order_increments WHERE order_id = ?", order_id)
     db.execute("DELETE FROM orders WHERE id = ?", order_id)
-    flash(f"Pedido Nº.{order_id} cancelado com sucesso")
+    flash(f"Pedido Nº.{order_id} apagado com sucesso")
     return redirect("/")
 
 @app.route("/order-details")
@@ -160,32 +187,69 @@ def order_details():
                                    order_id)[0].get("order_status")
 
 
-    increments = db.execute("SELECT order_increments.id AS id, username, DATETIME(increment_time, '-3 hours') AS increment_time FROM order_increments JOIN users ON order_increments.user_id = users.id WHERE order_id = ? ORDER BY increment_time DESC", order_id)
+    increments = db.execute("SELECT order_increments.id AS id, username, "
+                            "DATETIME(increment_time, '-3 hours') "
+                            "AS increment_time FROM order_increments "
+                            "JOIN users "
+                            "ON order_increments.user_id = "
+                            "users.id WHERE order_id = ? "
+                            "ORDER BY increment_time DESC", 
+                            order_id)
     for i in range(len(increments)):
-        increments[i]["products"] = db.execute("SELECT product_id, quantity, current_price, product_name FROM order_products JOIN products ON order_products.product_id = products.id WHERE order_increment_id = ? AND order_id = ? ORDER BY product_type_id, current_price", increments[i]["id"], order_id)
-        increments[i]["total"] = db.execute("SELECT SUM(quantity * current_price) AS total FROM order_products WHERE order_increment_id = ?", increments[i]["id"])[0].get("total")
-    return render_template("order-details.html", order=order, increments=increments, details=details)
-
+        increments[i]["products"] = db.execute("SELECT product_id, quantity, "
+                                               "current_price, product_name "
+                                               "FROM order_products "
+                                               "JOIN products "
+                                               "ON order_products.product_id = " 
+                                               "products.id "
+                                               "WHERE order_increment_id = ? " 
+                                               "AND order_id = ? "
+                                               "ORDER BY product_type_id, "
+                                               "current_price", 
+                                               increments[i]["id"], order_id)
+        increments[i]["total"] = db.execute("SELECT "
+                                            "SUM(quantity * current_price) "
+                                            "AS total FROM order_products "
+                                            "WHERE order_increment_id = ?",
+                                            increments[i]["id"])[0].get("total")
+    return render_template("order-details.html", order=order,
+                           increments=increments, details=details)
 
 
 @app.route("/history")
 @login_required
 def history():
     # TODO: Fix: When querying in a day interval, doesn't cover the correct interval
+    # TODO: Fix: the f string in the requests may lead to sql injection attack
     if request.args:
         total_sold = 0
         if request.args.get('date-range').isdigit():
-            since_date = db.execute(f"SELECT DATE(DATETIME(current_date, '-3 hours'), '-{request.args.get('date-range')} days') AS date")[0]["date"]
-            orders = db.execute(f"SELECT *, DATETIME(order_time, '-3 hours') AS order_timef FROM orders WHERE order_time BETWEEN DATETIME(DATETIME(current_date, '-3 hours'), '-{request.args.get('date-range')} days') AND current_timestamp ORDER BY order_time DESC")
+            since_date = db.execute("SELECT DATE("
+                                    "DATETIME(current_date, '-3 hours'), "
+                                    f"'-{request.args.get('date-range')} "
+                                    "days') "
+                                    "AS date")[0]["date"]
+            orders = db.execute("SELECT *, DATETIME(order_time, '-3 hours') "
+                                "AS order_timef "
+                                "FROM orders "
+                                "WHERE order_time BETWEEN "
+                                "DATETIME(DATETIME(current_date, '-3 hours'), "
+                                f"'-{request.args.get('date-range')} days') "
+                                "AND current_timestamp "
+                                "ORDER BY order_time DESC")
         else:
-            orders = db.execute(f"SELECT *, DATETIME(order_time, '-3 hours') AS order_timef FROM orders ORDER BY order_time DESC")
+            orders = db.execute("SELECT *, DATETIME(order_time, '-3 hours') "
+                                "AS order_timef FROM orders "
+                                "ORDER BY order_time DESC")
             since_date = "Sempre"
         order_products = list_products(orders)
         total_sold = 0
         for order in orders:
             total_sold += order["total"]
 
-        return render_template("history.html", orders=orders, order_products=order_products, total=total_sold, since=since_date)
+        return render_template("history.html", orders=orders,
+                               order_products=order_products,
+                               total=total_sold, since=since_date)
     else:
         return render_template("query-history.html")
 
@@ -205,7 +269,9 @@ def increment_order():
             for product in request.form:
                 if product.isnumeric() and request.form.get(product).isnumeric():
                     if int(request.form.get(product)) > 0:
-                        increment_products.append({"id": int(product), "quantity": int(request.form.get(product))})
+                        increment_products.append({"id": int(product), 
+                                                   "quantity": int(request.form
+                                                                   .get(product))})
         except:
             return apology("Não foi possível registrar o produto")
 
@@ -223,9 +289,13 @@ def increment_order():
         products = []
         for type in product_types:
             products.append({"type": type["product_type"],
-                             "products": db.execute("SELECT id, product_name, price FROM products WHERE product_type_id = ?", type["id"])})
+                             "products": db.execute("SELECT id, product_name, "
+                                                    "price FROM products "
+                                                    "WHERE product_type_id = ?",
+                                                    type["id"])})
         order=order[0]
-        return render_template("increment-order.html", products=products, order=order, order_id=order_id)
+        return render_template("increment-order.html", products=products,
+                               order=order, order_id=order_id)
 
 
 
@@ -288,16 +358,21 @@ def new_order():
             for product in request.form:
                 if product.isnumeric() and request.form.get(product).isnumeric():
                     if int(request.form.get(product)) > 0:
-                        order_products.append({"id": int(product), "quantity": int(request.form.get(product))})
+                        order_products.append({"id": int(product),
+                                               "quantity": int(request.form
+                                                               .get(product))})
         except:
             return apology("Não foi possível registrar o produto")
         customer = request.form.get("customer")
         table_number = request.form.get("table-number")
 
         # Register the order into the orders table
-        order_id = db.execute("INSERT INTO orders (user_id, customer_name, table_number) VALUES (?, ?, ?)", session["user_id"], customer, table_number)
+        order_id = db.execute("INSERT INTO orders "
+                              "(user_id, customer_name, table_number) "
+                              "VALUES (?, ?, ?)",
+                              session["user_id"], customer, table_number)
         add_order_products(order_id, order_products)
-        flash(f"Pedido N.º{order_id} Registrado")
+        flash(f"Pedido N.º{order_id} registrado")
         return redirect("/")
     # User reached route via GET
     else:
@@ -305,7 +380,9 @@ def new_order():
         products = []
         for type in product_types:
             products.append({"type": type["product_type"],
-                             "products": db.execute("SELECT id, product_name, price FROM products WHERE product_type_id = ?", type["id"])})
+                             "products": db.execute("SELECT id, product_name, "
+                             "price FROM products "
+                             "WHERE product_type_id = ?", type["id"])})
         return render_template("new-order.html", products=products)
 
 
@@ -339,13 +416,15 @@ def register():
                 return redirect("/register")
             # Verify if the username already exist
             try:
-                db.execute("INSERT INTO users (username, hash) VALUES (?, ?)", username, generate_password_hash(password))
+                db.execute("INSERT INTO users (username, hash) VALUES (?, ?)",
+                           username, generate_password_hash(password))
             except:
                 flash("Nome de usuário ja registrado")
                 return redirect("/register")
 
             # Logs the user
-            uid = db.execute("SELECT id FROM users WHERE username = ?", username)[0]["id"]
+            uid = db.execute("SELECT id FROM users WHERE username = ?", 
+                             username)[0]["id"]
             session["user_id"] = uid
             flash("Registrado com sucesso!")
             return redirect("/")

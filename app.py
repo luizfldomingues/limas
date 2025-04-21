@@ -4,7 +4,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import apology, brl, login_required
-allow_new_users = False
+import preferences
 # Configure application
 app = Flask(__name__)
 
@@ -158,63 +158,6 @@ def delete_order():
     db.execute("DELETE FROM orders WHERE id = ?", order_id)
     flash(f"Pedido Nº.{order_id} apagado com sucesso")
     return redirect("/")
-
-@app.route("/order-details")
-@login_required
-def order_details():
-    order_id = request.args.get("order-id")
-    order = db.execute("SELECT * FROM orders WHERE id = ?", order_id)
-    if len(order) != 1:
-        return apology("Pedido não encontrado")
-    # list_products(order_id, order)
-    order = order[0]
-    details = {}
-    details["total"] = db.execute("SELECT SUM(current_price * quantity) "
-                                  "AS total FROM order_products WHERE "
-                                  "order_id = ?", order_id)[0].get("total")
-    details["username"] = db.execute("SELECT username FROM users WHERE id "
-                                     "IN (SELECT user_id FROM orders "
-                                     "WHERE id = ?)", 
-                                     order_id)[0].get("username")
-    details["time"] = db.execute("SELECT "
-                                 "DATETIME(order_time, '-3 hours') "
-                                 "as order_time FROM orders "
-                                 "WHERE id = ?", 
-                                 order_id)[0].get("order_time")
-    details["status"] = db.execute("SELECT order_status "
-                                   "FROM orders "
-                                   "WHERE id = ?",
-                                   order_id)[0].get("order_status")
-
-
-    increments = db.execute("SELECT order_increments.id AS id, username, "
-                            "DATETIME(increment_time, '-3 hours') "
-                            "AS increment_time FROM order_increments "
-                            "JOIN users "
-                            "ON order_increments.user_id = "
-                            "users.id WHERE order_id = ? "
-                            "ORDER BY increment_time DESC", 
-                            order_id)
-    for i in range(len(increments)):
-        increments[i]["products"] = db.execute("SELECT product_id, quantity, "
-                                               "current_price, product_name "
-                                               "FROM order_products "
-                                               "JOIN products "
-                                               "ON order_products.product_id = " 
-                                               "products.id "
-                                               "WHERE order_increment_id = ? " 
-                                               "AND order_id = ? "
-                                               "ORDER BY product_type_id, "
-                                               "current_price", 
-                                               increments[i]["id"], order_id)
-        increments[i]["total"] = db.execute("SELECT "
-                                            "SUM(quantity * current_price) "
-                                            "AS total FROM order_products "
-                                            "WHERE order_increment_id = ?",
-                                            increments[i]["id"])[0].get("total")
-    return render_template("order-details.html", order=order,
-                           increments=increments, details=details)
-
 
 @app.route("/history")
 @login_required
@@ -385,17 +328,71 @@ def new_order():
                              "WHERE product_type_id = ?", type["id"])})
         return render_template("new-order.html", products=products)
 
+@app.route("/order-details")
+@login_required
+def order_details():
+    order_id = request.args.get("order-id")
+    order = db.execute("SELECT * FROM orders WHERE id = ?", order_id)
+    if len(order) != 1:
+        return apology("Pedido não encontrado")
+    # list_products(order_id, order)
+    order = order[0]
+    details = {}
+    details["total"] = db.execute("SELECT SUM(current_price * quantity) "
+                                  "AS total FROM order_products WHERE "
+                                  "order_id = ?", order_id)[0].get("total")
+    details["username"] = db.execute("SELECT username FROM users WHERE id "
+                                     "IN (SELECT user_id FROM orders "
+                                     "WHERE id = ?)", 
+                                     order_id)[0].get("username")
+    details["time"] = db.execute("SELECT "
+                                 "DATETIME(order_time, '-3 hours') "
+                                 "as order_time FROM orders "
+                                 "WHERE id = ?", 
+                                 order_id)[0].get("order_time")
+    details["status"] = db.execute("SELECT order_status "
+                                   "FROM orders "
+                                   "WHERE id = ?",
+                                   order_id)[0].get("order_status")
+
+
+    increments = db.execute("SELECT order_increments.id AS id, username, "
+                            "DATETIME(increment_time, '-3 hours') "
+                            "AS increment_time FROM order_increments "
+                            "JOIN users "
+                            "ON order_increments.user_id = "
+                            "users.id WHERE order_id = ? "
+                            "ORDER BY increment_time DESC", 
+                            order_id)
+    for i in range(len(increments)):
+        increments[i]["products"] = db.execute("SELECT product_id, quantity, "
+                                               "current_price, product_name "
+                                               "FROM order_products "
+                                               "JOIN products "
+                                               "ON order_products.product_id = " 
+                                               "products.id "
+                                               "WHERE order_increment_id = ? " 
+                                               "AND order_id = ? "
+                                               "ORDER BY product_type_id, "
+                                               "current_price", 
+                                               increments[i]["id"], order_id)
+        increments[i]["total"] = db.execute("SELECT "
+                                            "SUM(quantity * current_price) "
+                                            "AS total FROM order_products "
+                                            "WHERE order_increment_id = ?",
+                                            increments[i]["id"])[0].get("total")
+    return render_template("order-details.html", order=order,
+                           increments=increments, details=details)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-
+    """Register new users"""
     if session.get("user_id"):
         # Clear the user session
         session.clear()
-
     # User reached route via POST:
     if request.method == "POST":
-        if allow_new_users:
+        if preferences.allow_new_users:
             username = request.form.get("username")
             password = request.form.get("password")
             confirmation = request.form.get("confirmation")

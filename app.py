@@ -139,14 +139,25 @@ def order_details():
     order = db.execute("SELECT * FROM orders WHERE id = ?", order_id)
     if len(order) != 1:
         return apology("Pedido não encontrado")
-    # TODO: Calculates the total of the order
     # list_products(order_id, order)
     order = order[0]
     details = {}
-    details["total"] = db.execute("SELECT SUM(current_price * quantity) AS total FROM order_products WHERE order_id = ?", order_id)[0].get("total")
-    details["username"] = db.execute("SELECT username FROM users WHERE id IN (SELECT user_id FROM orders WHERE id = ?)", order_id)[0].get("username")
-    details["time"] = db.execute("SELECT DATETIME(order_time, '-3 hours') as order_time FROM orders WHERE id = ?", order_id)[0].get("order_time")
-    details["status"] = db.execute("SELECT order_status FROM orders WHERE id = ?", order_id)[0].get("order_status")
+    details["total"] = db.execute("SELECT SUM(current_price * quantity) "
+                                  "AS total FROM order_products WHERE "
+                                  "order_id = ?", order_id)[0].get("total")
+    details["username"] = db.execute("SELECT username FROM users WHERE id "
+                                     "IN (SELECT user_id FROM orders "
+                                     "WHERE id = ?)", 
+                                     order_id)[0].get("username")
+    details["time"] = db.execute("SELECT "
+                                 "DATETIME(order_time, '-3 hours') "
+                                 "as order_time FROM orders "
+                                 "WHERE id = ?", 
+                                 order_id)[0].get("order_time")
+    details["status"] = db.execute("SELECT order_status "
+                                   "FROM orders "
+                                   "WHERE id = ?",
+                                   order_id)[0].get("order_status")
 
 
     increments = db.execute("SELECT order_increments.id AS id, username, DATETIME(increment_time, '-3 hours') AS increment_time FROM order_increments JOIN users ON order_increments.user_id = users.id WHERE order_id = ? ORDER BY increment_time DESC", order_id)
@@ -160,6 +171,7 @@ def order_details():
 @app.route("/history")
 @login_required
 def history():
+    # TODO: Fix: When querying in a day interval, doesn't cover the correct interval
     if request.args:
         total_sold = 0
         if request.args.get('date-range').isdigit():

@@ -22,7 +22,7 @@ Detalhes pedido N.º{{ order.id }}
             <tbody>
                 <tr>
                     <th class="align-right">Criado por:</th>
-                    <td>{{ details.username }}</td>
+                    <td>{{ details.username | title}}</td>
                 </tr>
                 <tr>
                     <th class="align-right">Criado em:</th>
@@ -39,7 +39,7 @@ Detalhes pedido N.º{{ order.id }}
                 </tr>
                 <tr>
                     <th class="align-right">Total:</th>
-                    <td>{{ details.total | brl }}</td>
+                    <th>{{ details.total | brl }}</th>
                 </tr>
             </tbody>
         <tfoot>
@@ -80,7 +80,7 @@ Detalhes pedido N.º{{ order.id }}
                 <tbody>
                     <tr>
                         <th colspan="2" class="align-right">Incrementado por:</th>
-                        <td>{{ increment.username }}</td>
+                        <td>{{ increment.username | title}}</td>
                     </tr>
                     <tr>
                         <th colspan="2" class="align-right">Incrementado em:</th>
@@ -101,7 +101,7 @@ Detalhes pedido N.º{{ order.id }}
                         {% endfor %}
                         <tr>
                             <th colspan="2">Total:</th>
-                            <td>{{ increment.total | brl}}</td>
+                            <th>{{ increment.total | brl}}</th>
                         </tr>
                     {% endif %}
                 </tbody>

@@ -18,7 +18,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configure the cs50 lib to use the database
-db = SQL("sqlite:///limas.db")
+db = SQL("sqlite:///database/limas.db")
 
 # TODO: understand what this means
 @app.after_request

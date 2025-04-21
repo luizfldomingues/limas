@@ -48,9 +48,17 @@ Detalhes pedido N.º{{ order.id }}
                         <table class="table table-borderless mb-0">
                             <tr>
                                 <td>
-                                    <form action="/delete-order" method="get">
+                                    <form action="/modify-order-status" method="post">
+                                        <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="order-id" value="{{ order.id }}">
-                                        <button class="border btn btn-danger" type="submit">Apagar pedido</button>
+                                        <button class="border btn btn-danger" type="submit">Apagar</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="/modify-order-status" method="post">
+                                        <input type="hidden" name="action" value="reopen">
+                                        <input type="hidden" name="order-id" value="{{ order.id }}">
+                                        <button class="border btn btn-warning" type="submit">Reabrir</button>
                                     </form>
                                 </td>
                             </tr>

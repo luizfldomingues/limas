@@ -66,31 +66,17 @@ def list_products(orders):
     return order_products
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 @login_required
 def index():
-    # User reached route via POST
-    if request.method == "POST":
-        try:
-            if request.form.get("finish-order"):
-                db.execute("UPDATE orders "
-                "SET order_status = 'completed' WHERE id = ?", 
-                           request.form.get("finish-order"))
-                flash(f"Pedido N.º {request.form.get("finish-order")} "
-                      "finalizado com sucesso")
-        except:
-            return apology("Algo deu errado com a mudança do status do pedido")
-        return redirect("/")
-    # User reached route via GET
-    else:
-        # Request the list of pending orders and the list of products
-        pending_orders = db.execute("SELECT * FROM orders "
-                                    "WHERE order_status = 'pending' "
-                                    "ORDER BY id DESC")
-        order_products = list_products(pending_orders)
-        return render_template("index.html",
-                               orders=pending_orders, 
-                               order_products=order_products)
+    # Request the list of pending orders and the list of products
+    pending_orders = db.execute("SELECT * FROM orders "
+                                "WHERE order_status = 'pending' "
+                                "ORDER BY id DESC")
+    order_products = list_products(pending_orders)
+    return render_template("index.html",
+                            orders=pending_orders, 
+                            order_products=order_products)
 
 
 @app.route("/edit-order", methods=["GET", "POST"])
@@ -144,20 +130,39 @@ def edit_order():
         return render_template("edit-order.html", order=order[0],
                                order_products=order_products[int(order_id)])
 
-@app.route("/delete-order")
+@app.route("/modify-order-status", methods=["POST"])
 @login_required
 def delete_order():
-    order_id = request.args.get("order-id")
+    order_id = request.form.get("order-id")
     order = db.execute("SELECT order_status FROM orders WHERE id = ?",
                        order_id)
     if len(order) != 1:
         return apology("Não foi possível encontrar o pedido")
     order = order[0]
-    db.execute("DELETE FROM order_products WHERE order_id = ?", order_id)
-    db.execute("DELETE FROM order_increments WHERE order_id = ?", order_id)
-    db.execute("DELETE FROM orders WHERE id = ?", order_id)
-    flash(f"Pedido Nº.{order_id} apagado com sucesso")
-    return redirect("/")
+    action = request.form.get("action")
+    if action == "delete":
+        db.execute("DELETE FROM order_products WHERE order_id = ?", order_id)
+        db.execute("DELETE FROM order_increments WHERE order_id = ?", order_id)
+        db.execute("DELETE FROM orders WHERE id = ?", order_id)
+        flash(f"Pedido Nº.{order_id} apagado com sucesso")
+        return redirect("/")
+    if action == "complete":
+        try:
+            db.execute("UPDATE orders "
+                       "SET order_status = 'completed' WHERE id = ?", 
+                       order_id)
+            flash(f"Pedido N.º {order_id} "
+                    "completado com sucesso")
+        except:
+            return apology("Algo deu errado com a mudança do status do pedido")
+        return redirect("/")
+    if action == "reopen":
+        try:
+            db.execute("UPDATE orders SET order_status = 'pending' WHERE id = ?", order_id)
+        except:
+            return apology("Não foi possível reabrir o pedido")
+        flash(f"Pedido Nº.{order_id} reaberto com sucesso")
+        return redirect("/")
 
 @app.route("/history")
 @login_required

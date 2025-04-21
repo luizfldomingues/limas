@@ -59,9 +59,10 @@ Página Inicial
                         <table class="table table-borderless mb-0">
                             <tr>
                                 <td>
-                                    <form action="/" method="post">
-                                        <input type="hidden" name="finish-order" value="{{ order.id }}">
-                                        <button class="border btn btn-danger mx-auto" type="submit">Finalizar</button>
+                                    <form action="/modify-order-status" method="post">
+                                        <input type="hidden" name="order-id" value="{{ order.id }}">
+                                        <input type="hidden" name="action" value="complete">
+                                        <button class="border btn btn-danger mx-auto" type="submit">Completar</button>
                                     </form>
                                 </td>
                                 <td>

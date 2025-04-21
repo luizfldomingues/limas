@@ -117,10 +117,10 @@ def edit_order():
         for actual_product in actual_products:
             if request.form.get(str(actual_product["id"])):
                 if request.form.get(str(actual_product["id"])).isnumeric():
-                    intended_products[actual_product["id"]] =
-                    int(request.form.get(str((actual_product["id"]))))
-                    else:
-                        intended_products[actual_product["id"]] = 0
+                    intended_products[actual_product["id"]] = (
+                    int(request.form.get(str((actual_product["id"])))))
+                else:
+                    intended_products[actual_product["id"]] = 0
         # Populates the increment_products list
         for actual_product in actual_products:
             if type(intended_products.get(actual_product["id"])) != None:

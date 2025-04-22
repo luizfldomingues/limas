@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Gerenciar
+{% endblock %}
+
+{% block main %}
+
+{% for product_type in product_types %}
+<div class="m-1 p-1">
+	<table class="table table-bordered table-striped">
+		<thead>
+			<tr class="table-primary">
+				<th>{{ product_type.product_type | capitalize }}</th>
+			</tr>
+		</thead>
+	</table>
+</div>
+{% endfor %}
+
+{% endblock %}

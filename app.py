@@ -287,8 +287,17 @@ def logout():
 @app.route("/manage")
 @login_required
 def manage():
-    return apology("TODO")
-
+    product_types = db.execute("SELECT * FROM product_types "
+                               "WHERE type_status = 'active'")
+    for c in range(len(product_types)):
+        product_types[c]["products"] = db.execute("SELECT * "
+                                                  "FROM products "
+                                                  "WHERE product_type_id = ? "
+                                                  "AND product_status "
+                                                  "= 'active' "
+                                                  "ORDER BY price",
+                                                  product_types[c]["id"])
+    return render_template("manage.html", product_types=product_types)
 
 @app.route("/new-order", methods=["GET", "POST"])
 @login_required

@@ -304,10 +304,51 @@ def manage():
 def manage_edit():
     """Edit a product or product type"""
     if request.method == "POST":
-        return apology("TODO")
-    
-    # User reached via GET
+        if request.form.get("product-id"):
+            # Check if the product with given id exists
+            product = db.execute("SELECT * FROM products "
+                                 "WHERE id=?",
+                                 request.form.get("product-id"))
+            if len(product) != 1:
+                return apology("Product was not found")
+            product = product[0]
+            new_values = {
+                "name": request.form.get("product-name"),
+                "price": request.form.get("product-price"),
+                "type": request.form.get("product-type"),
+                "status": request.form.get("product-status")
+            }
+            # Validate the new_values data
+            if (not new_values["name"]
+            or not new_values["price"].isnumeric() 
+            or len(db.execute("SELECT id FROM product_types "
+                              "WHERE id=?",
+                              new_values["type"])) != 1
+            or not new_values["status"] in ["active", "inactive"]):
+                return apology("Algum dos valores enviados são incompatíveis")
+            try:
+                db.execute("UPDATE products "
+                        "SET product_name = ?, "
+                        "price = ?, "
+                        "product_type_id = ?, "
+                        "product_status = ? "
+                        "WHERE id = ?",
+                        new_values["name"],
+                        new_values["price"],
+                        new_values["type"],
+                        new_values["status"],
+                        product["id"])   
+            except Exception as exception:
+                return apology(f"Não foi possível editar o produto\n{exception}")
+            flash(f"Produto N.º{product["id"]} editado com sucesso")
+            return redirect("/manage")
+        elif request.form.get("product-type-id"):
+            
+            return redirect("/")
+
+    # User reached route via GET
     else:
+        # Serve page for editing a product
         if request.args.get("product-id"):
             product = db.execute("SELECT * FROM products "
                                  "WHERE id = ?",
@@ -320,6 +361,7 @@ def manage_edit():
             return render_template("edit-product.html",
                                    product=product,
                                    product_types=product_types)
+        # Serve page for editing a product type
         elif request.args.get("product-type-id"):
             product_type = db.execute("SELECT * FROM product_types "
                                       "WHERE id = ?",
@@ -334,6 +376,7 @@ def manage_edit():
                                                          "= 'active'",
                                                          product_type["id"])
             return render_template("edit-product-type.html", product_type=product_type)
+
 
 @app.route("/new-order", methods=["GET", "POST"])
 @login_required

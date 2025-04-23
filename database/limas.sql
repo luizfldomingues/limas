@@ -1,7 +1,7 @@
 CREATE TABLE product_types (
     id INTEGER PRIMARY KEY NOT NULL,
     product_type TEXT NOT NULL,
-    type_status TEXT CHECK (type_status IN ('active', 'unactive')) NOT NULL DEFAULT 'active'
+    type_status TEXT CHECK (type_status IN ('active', 'inactive')) NOT NULL DEFAULT 'active'
 );
 
 CREATE TABLE products (
@@ -9,7 +9,7 @@ CREATE TABLE products (
     product_name TEXT NOT NULL,
     product_type_id INTEGER NOT NULL,
     price INTEGER NOT NULL,
-    product_status TEXT CHECK (product_status IN ('active', 'unactive')) NOT NULL DEFAULT 'active',
+    product_status TEXT CHECK (product_status IN ('active', 'inactive')) NOT NULL DEFAULT 'active',
     FOREIGN KEY (product_type_id) REFERENCES product_types(id)
 );
 

@@ -1,9 +1,71 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Editar tipo de produto
+Editar produto
 {% endblock %}
 
 {% block main %}
-{{ product_type }}
+<div class="mt-3">
+    <form action="/manage/edit" aciton="post">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr class="table-warning">
+                    <td colspan="2" >
+                        Tipo de produto N.º{{ product_type.id }}
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Nome do tipo:</th>
+                    <td>
+                        <div>
+                            <input class="form-control" name="product-type-name" type="text" value="{{ product_type.product_type }}">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <th>Status do produto</th>
+                    <td>
+                        <select class="form-control" name="product-name">
+                            {% if product_type.type_status == "active" %}
+                            <option value="active" selected>Ativo</option>
+                            <option value="inactive">Inativo</option>
+                            {% else %}
+                            <option value="active">Ativo</option>
+                            <option value="inactive" selected>Inativo</option>
+                            {% endif %}
+                        </select>
+                    </td>
+                    </th>
+                </tr>
+                <tr>
+                    <th>Tipo de produto</th>
+                    <td>
+                        <div>
+                            <select class="form-control" name="product-name">
+                                {% for product_type in product_types %}
+                                    <option value=" {{ product_type.id }}">{{ product_type.product_type | capitalize }}</option>
+                                {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">
+                        <button class="border btn btn-warning" type="submit">Confirmar Edição</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+</div>
+<div class="my-5">
+    <form action="/manage/desactivate">
+        <input class="form-control" name="product-id" type="hidden" value="{{ product_type.id }}">
+        <button class="border btn btn-danger" type="submit">Desativar Produto</button>
+    </form>
+</div>
 {% endblock %}

@@ -10,7 +10,7 @@ Editar produto
         <table class="table table-bordered table-striped">
             <thead>
                 <tr class="table-warning">
-                    <td colspan="3" >
+                    <td colspan="2" >
                         Produto N.º{{ product.id }}
                     </td>
                 </tr>
@@ -38,9 +38,23 @@ Editar produto
                         <div>
                             <select class="form-control" name="product-name">
                                 {% for product_type in product_types %}
-                                    <option value=" {{ product_type.id }}">{{ product_type.product_type | capitalize }}</option>
+                                <option value=" {{ product_type.id }}">{{ product_type.product_type | capitalize }}</option>
                                 {% endfor %}
                         </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Status do produto</th>
+                    <td>
+                        <select class="form-control" name="product-name">
+                            {% if product.product_status == "active" %}
+                            <option value="active" selected>Ativo</option>
+                            <option value="inactive">Inativo</option>
+                            {% else %}
+                            <option value="active">Ativo</option>
+                            <option value="inactive" selected>Inativo</option>
+                            {% endif %}
+                        </select>
                     </td>
                 </tr>
             </tbody>
@@ -52,12 +66,6 @@ Editar produto
                 </tr>
             </tfoot>
         </table>
-    </form>
-</div>
-<div class="my-5">
-    <form action="/manage/desactivate">
-        <input class="form-control" name="product-id" type="hidden" value="{{ product.id }}">
-        <button class="border btn btn-danger" type="submit">Desativar Produto</button>
     </form>
 </div>
 {% endblock %}

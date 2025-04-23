@@ -25,12 +25,35 @@ Gerenciar
 		<tr>
 			<td>{{ product.product_name | capitalize }}</td>
 			<td>{{ product.price | brl }}</td>
-			<td>TODO</td>
+			<td>
+				<form action="/manage-details" method="get">
+					<input type="hidden" name="product-id" value="{{ product.id }}">
+					<button class="border btn mx-auto" type="submit">Editar</button>
+				</form>
+			</td>
 		</tr>
 		{% endfor %}
 			{% else %}
 		</thead>
 			{% endif %}
+		<tfoot>
+			<tr>
+				<td colspan="3">
+					<div class="mx-auto">
+						<table class="table table-borderless m-0">
+							<tr>
+								<td class="p-0">
+									<form action="/manage-details" method="get">
+										<input type="hidden" name="product-type-id" value="{{ product_type.id }}">
+										<button class="border btn btn-warning mx-auto" type="submit">Editar</button>
+									</form>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+		</tfoot>
 	</table>
 </div>
 {% endfor %}

@@ -11,9 +11,26 @@ Gerenciar
 	<table class="table table-bordered table-striped">
 		<thead>
 			<tr class="table-primary">
-				<th>{{ product_type.product_type | capitalize }}</th>
+				<th colspan="3">{{ product_type.product_type | capitalize }}</th>
+			</tr>
+			{% if product_type.products %}
+			<tr>
+				<th>Produto</th>
+				<th>Preço</th>
+				<th>Opção</th>
 			</tr>
 		</thead>
+		<tbody>
+		{% for product in product_type.products %}
+		<tr>
+			<td>{{ product.product_name | capitalize }}</td>
+			<td>{{ product.price | brl }}</td>
+			<td>TODO</td>
+		</tr>
+		{% endfor %}
+			{% else %}
+		</thead>
+			{% endif %}
 	</table>
 </div>
 {% endfor %}

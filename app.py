@@ -315,7 +315,11 @@ def manage_edit():
             if len(product) != 1:
                 return apology("Produto não encontrado")
             product = product[0]
-            return render_template("edit-product.html", product=product)
+            product_types = db.execute("SELECT * FROM product_types "
+                                       "WHERE type_status = 'active'")
+            return render_template("edit-product.html",
+                                   product=product,
+                                   product_types=product_types)
         elif request.args.get("product-type-id"):
             product_type = db.execute("SELECT * FROM product_types "
                                       "WHERE id = ?",

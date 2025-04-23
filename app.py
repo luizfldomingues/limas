@@ -299,6 +299,38 @@ def manage():
                                                   product_types[c]["id"])
     return render_template("manage.html", product_types=product_types)
 
+@app.route("/manage/edit", methods=["GET", "POST"])
+@login_required
+def manage_edit():
+    """Edit a product or product type"""
+    if request.method == "POST":
+        return apology("TODO")
+    
+    # User reached via GET
+    else:
+        if request.args.get("product-id"):
+            product = db.execute("SELECT * FROM products "
+                                 "WHERE id = ?",
+                                 request.args.get("product-id"))
+            if len(product) != 1:
+                return apology("Produto não encontrado")
+            product = product[0]
+            return render_template("edit-product.html", product=product)
+        elif request.args.get("product-type-id"):
+            product_type = db.execute("SELECT * FROM product_types "
+                                      "WHERE id = ?",
+                                      request.args.get("product-type-id"))
+            if len(product_type) != 1:
+                return apology("Tipo de produto não encontrado")
+            product_type = product_type[0]
+            product_type["active_products"] = db.execute("SELECT COUNT(id) "
+                                                         "FROM products "
+                                                         "WHERE product_type_id = ? "
+                                                         "AND product_status "
+                                                         "= 'active'",
+                                                         product_type["id"])
+            return render_template("edit-product-type.html", product_type=product_type)
+
 @app.route("/new-order", methods=["GET", "POST"])
 @login_required
 def new_order():

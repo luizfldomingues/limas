@@ -288,9 +288,7 @@ def logout():
 @app.route("/manage", defaults={"status": "active"})
 @login_required
 def manage(status):
-    # first time using variables in the url
-    # it may conflict with the /manage/edit url
-    # status = request.args.get("status")
+    # TODO: User can edit active products of inactive product types
     if status == "active": 
         product_types = db.execute("SELECT * FROM product_types "
                                 "WHERE type_status = 'active'")
@@ -423,11 +421,46 @@ def manage_edit():
             return render_template("edit-product-type.html", product_type=product_type)
 
 
+@app.route("/manage/new/product", methods=["GET", "POST"])
+@login_required
+def manage_new_products():
+    if request.method == "POST":
+        # User wants to create a new product
+        # Check if the form is valid
+        new_values = {
+            "name": request.form.get("product-name"),
+            "price": request.form.get("product-price"),
+            "type": request.form.get("product-type"),
+        }
+        # Validate the new_values data
+        if (not new_values["name"]
+        or not new_values["price"].isnumeric() 
+        or len(db.execute("SELECT id FROM product_types "
+                            "WHERE id = ?",
+                            new_values["type"])) != 1):
+            return apology("Algum dos valores enviados são incompatíveis")
+        try:
+            db.execute("INSERT INTO products "
+                       "(product_name, price, product_type_id) "
+                       "VALUES (?, ?, ?)",
+                       new_values["name"],
+                       new_values["price"],
+                       new_values["type"])
+        except Exception as exception:
+            return apology(f"Não foi possível registar o produto o produto: \n{exception}")
+        flash(f"Produto registrado com sucesso")
+        return redirect("/manage")
+    # User reached route via get
+    else:
+        product_types = db.execute("SELECT * FROM product_types "
+                                   "WHERE type_status = 'active'")
+        return render_template("new-product.html", product_types=product_types)
+
+
 @app.route("/new-order", methods=["GET", "POST"])
 @login_required
 def new_order():
     """Register new orders"""
-    # User reached route via POST
     if request.method == "POST":
         order_products = []
         # Append each ordered product to the order_products list

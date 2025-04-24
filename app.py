@@ -234,7 +234,7 @@ def increment_order():
         product_types = db.execute("SELECT * FROM product_types")
         products = []
         for type in product_types:
-            products.append({"type": type["product_type"],
+            products.append({"type": type["type_name"],
                              "products": db.execute("SELECT id, product_name, "
                                                     "price FROM products "
                                                     "WHERE product_type_id = ?",
@@ -291,12 +291,213 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
+@app.route("/manage/<status>")
+@app.route("/manage", defaults={"status": "active"})
+@login_required
+def manage(status):
+    # TODO: User can edit active products of inactive product types
+    # WORKING on
+    if status == "active": 
+        product_types = db.execute("SELECT * FROM product_types "
+                                "WHERE type_status = 'active'")
+        for c in range(len(product_types)):
+            product_types[c]["products"] = db.execute("SELECT * "
+                                                    "FROM products "
+                                                    "WHERE product_type_id = ? "
+                                                    "AND product_status "
+                                                    "= 'active' "
+                                                    "ORDER BY price",
+                                                    product_types[c]["id"])
+        return render_template("manage.html", product_types=product_types, status=status)
+    elif status == "inactive":
+        product_types = db.execute("SELECT * FROM product_types")
+        for c in range(len(product_types)):
+            if product_types[c]["type_status"] == "active":
+                product_types[c]["products"] = db.execute("SELECT * "
+                                                        "FROM products "
+                                                        "WHERE product_type_id = ? "
+                                                        "AND product_status "
+                                                        "= 'inactive' "
+                                                        "ORDER BY price",
+                                                        product_types[c]["id"])
+            elif product_types[c]["type_status"] == "inactive":
+                product_types[c]["products"] = db.execute("SELECT * "
+                                                        "FROM products "
+                                                        "WHERE product_type_id = ? "
+                                                        "ORDER BY price",
+                                                        product_types[c]["id"])
+        return render_template("manage.html", product_types=product_types, status=status)
+
+
+@app.route("/manage/edit", methods=["GET", "POST"])
+@login_required
+def manage_edit():
+    """Edit a product or product type"""
+    if request.method == "POST":
+        # A product id is given
+        if request.form.get("product-id"):
+            # Check if the product with given id exists
+            product = db.execute("SELECT * FROM products "
+                                 "WHERE id=?",
+                                 request.form.get("product-id"))
+            if len(product) != 1:
+                return apology("Product was not found")
+            product = product[0]
+            new_values = {
+                "name": request.form.get("product-name"),
+                "price": request.form.get("product-price"),
+                "type": request.form.get("product-type"),
+                "status": request.form.get("product-status")
+            }
+            # Validate the new_values data
+            if (not new_values["name"]
+            or not new_values["price"].isnumeric() 
+            or len(db.execute("SELECT id FROM product_types "
+                              "WHERE id = ?",
+                              new_values["type"])) != 1
+            or not new_values["status"] in ["active", "inactive"]):
+                return apology("Algum dos valores enviados são incompatíveis")
+            try:
+                db.execute("UPDATE products "
+                        "SET product_name = ?, "
+                        "price = ?, "
+                        "product_type_id = ?, "
+                        "product_status = ? "
+                        "WHERE id = ?",
+                        new_values["name"],
+                        new_values["price"],
+                        new_values["type"],
+                        new_values["status"],
+                        product["id"])   
+            except Exception as exception:
+                return apology(f"Não foi possível editar o produto\n{exception}")
+            flash(f"Produto N.º{product["id"]} editado com sucesso")
+            return redirect("/manage")
+        # A product_type_id is given
+
+        elif request.form.get("product-type-id"):
+            # Check if the product_type with given id exists
+            product_type = db.execute("SELECT * FROM product_types "
+                                 "WHERE id = ?",
+                                 request.form.get("product-type-id"))
+            if len(product_type) != 1:
+                return apology("Tipo de produto não encontrado")
+            product_type = product_type[0]
+            new_values = {
+                "name": request.form.get("type-name"),
+                "status": request.form.get("type-status")
+            }
+            # Validate the new_values data
+            if (not new_values["name"]
+            or not new_values["status"] in ["active", "inactive"]):
+                return apology("Algum dos valores enviados são incompatíveis")
+            try:
+                db.execute("UPDATE product_types "
+                        "SET type_name = ?, "
+                        "type_status = ? "
+                        "WHERE id = ?",
+                        new_values["name"],
+                        new_values["status"],
+                        product_type["id"])   
+            except Exception as exception:
+                return apology(f"Não foi possível editar o tipo de produto\n{exception}")
+            flash(f"Tipo de produto N.º{product_type["id"]} editado com sucesso")
+            return redirect("/manage")
+
+    # User reached route via GET
+    else:
+        # Serve page for editing a product
+        if request.args.get("product-id"):
+            product = db.execute("SELECT * FROM products "
+                                 "WHERE id = ?",
+                                 request.args.get("product-id"))
+            if len(product) != 1:
+                return apology("Produto não encontrado")
+            product = product[0]
+            product_types = db.execute("SELECT * FROM product_types "
+                                       "WHERE type_status = 'active'")
+            return render_template("edit-product.html",
+                                   product=product,
+                                   product_types=product_types)
+        # Serve page for editing a product type
+        elif request.args.get("product-type-id"):
+            product_type = db.execute("SELECT * FROM product_types "
+                                      "WHERE id = ?",
+                                      request.args.get("product-type-id"))
+            if len(product_type) != 1:
+                return apology("Tipo de produto não encontrado")
+            product_type = product_type[0]
+            product_type["active_products"] = db.execute("SELECT COUNT(id) "
+                                                         "FROM products "
+                                                         "WHERE product_type_id = ? "
+                                                         "AND product_status "
+                                                         "= 'active'",
+                                                         product_type["id"])
+            return render_template("edit-product-type.html", product_type=product_type)
+
+
+@app.route("/manage/new/product", methods=["GET", "POST"])
+@login_required
+def manage_new_product():
+    if request.method == "POST":
+        # User wants to create a new product
+        new_values = {
+            "name": request.form.get("product-name"),
+            "price": request.form.get("product-price"),
+            "type": request.form.get("product-type"),
+        }
+        # Validate the new_values data
+        if (not new_values["name"]
+        or not new_values["price"].isnumeric() 
+        or len(db.execute("SELECT id FROM product_types "
+                            "WHERE id = ?",
+                            new_values["type"])) != 1):
+            return apology("Algum dos valores enviados são incompatíveis")
+        try:
+            db.execute("INSERT INTO products "
+                       "(product_name, price, product_type_id) "
+                       "VALUES (?, ?, ?)",
+                       new_values["name"],
+                       new_values["price"],
+                       new_values["type"])
+        except Exception as exception:
+            return apology(f"Não foi possível registar o produto: \n{exception}")
+        flash(f"Produto registrado com sucesso")
+        return redirect("/manage")
+    # User reached route via get
+    else:
+        product_types = db.execute("SELECT * FROM product_types "
+                                   "WHERE type_status = 'active'")
+        return render_template("new-product.html", product_types=product_types)
+
+
+@app.route("/manage/new/product-type", methods=["GET", "POST"])
+@login_required
+def manage_new_product_type():
+    if request.method == "POST":
+        # User wants to create a new product type
+        type_name = request.form.get("type-name")
+
+        # Validate the new_values data
+        if not type_name:
+            return apology("Insira um nome para o tipo de produto")
+        try:
+            db.execute("INSERT INTO product_types "
+                       "(type_name) "
+                       "VALUES (?)",
+                       type_name)
+        except Exception as exception:
+            return apology(f"Não foi possível registar o tipo de produto: \n{exception}")
+        flash(f"Tipo de produto registrado com sucesso")
+        return redirect("/manage")
+        # User reached route via get
+    else:
+        return render_template("new-product-type.html")
 
 @app.route("/new-order", methods=["GET", "POST"])
 @login_required
 def new_order():
     """Register new orders"""
-    # User reached route via POST
     if request.method == "POST":
         order_products = []
         # Append each ordered product to the order_products list
@@ -325,7 +526,7 @@ def new_order():
         product_types = db.execute("SELECT * FROM product_types")
         products = []
         for type in product_types:
-            products.append({"type": type["product_type"],
+            products.append({"type": type["type_name"],
                              "products": db.execute("SELECT id, product_name, "
                              "price FROM products "
                              "WHERE product_type_id = ?", type["id"])})

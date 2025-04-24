@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Editar produto
+{% endblock %}
+
+{% block main %}
+<div class="mt-3">
+    <form action="/manage/edit" method="post">
+        <input class="form-control" name="product-id" type="hidden" value="{{ product.id }}">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr class="table-warning">
+                    <td colspan="2" >
+                        Produto N.º{{ product.id }}
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Nome do produto:</th>
+                    <td>
+                        <div>
+                            <input class="form-control" name="product-name" type="text" value="{{ product.product_name }}">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        Preço: (centavos)
+                    </th>
+                    <td>
+                        <div>
+                            <input class="form-control" name="product-price" type="number" value="{{ product.price }}">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Tipo de produto</th>
+                    <td>
+                        <div>
+                            <select class="form-control" name="product-type">
+                                {% for product_type in product_types %}
+                                <option {% if product_type.id == product.product_type_id %}selected{% endif %} value="{{ product_type.id }}">{{ product_type.type_name | capitalize }}</option>
+                                {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Status do produto</th>
+                    <td>
+                        <select class="form-control" name="product-status">
+                            {% if product.product_status == "active" %}
+                            <option value="active" selected>Ativo</option>
+                            <option value="inactive">Inativo</option>
+                            {% else %}
+                            <option value="active">Ativo</option>
+                            <option value="inactive" selected>Inativo</option>
+                            {% endif %}
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">
+                        <button class="border btn btn-warning" type="submit">Confirmar Edição</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+</div>
+{% endblock %}

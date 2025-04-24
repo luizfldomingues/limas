@@ -1,0 +1,98 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Gerenciar
+{% endblock %}
+
+{% block main %}
+
+<table class="table">
+	<tr>
+		<td colspan="2">
+	{% if status == 'active' %}
+			<a href="/manage/inactive">
+				<div>
+					<button class="border btn btn-warning" type="text">Gerenciar os inativos</button>
+				</div>
+			</a>
+	{% else %}
+			<a href="/manage">
+				<div>
+					<button class="border btn btn-success" type="text">Gerenciar os ativos</button>
+				</div>
+			</a>
+	{% endif %}
+		</td>
+	</td>
+	<tr>
+		<td>
+			<a href = "/manage/new/product">
+				<div>
+					<button class="border btn btn-secondary" type="text">Novo produto</button>
+				</div>
+			</a>
+		</td>
+		<td>
+			<a href="/manage/new/product-type">
+				<div>
+					<button class="border btn btn-secondary" type="text">Novo tipo de produto</button>
+				</div>
+			</a>
+		</td>
+	</tr>
+</table>
+{% for product_type in product_types %}
+{% if (((product_type.products) or (status == 'active')) or product_type.type_status == 'inactive') %}
+<div class="m-1 p-1">
+	<table class="table table-bordered table-striped">
+		<thead class="{% if product_type.type_status == 'active' and status == 'inactive' %}table-success{% elif status == 'inactive' %}table-warning{% endif %}">
+			<tr class="{% if status == 'active' %}table-primary{% endif %}">
+				<th colspan="3">{{ product_type.type_name | capitalize }}</th>
+			</tr>
+			{% if product_type.products %}
+			<tr>
+				<th>Produto</th>
+				<th>Preço</th>
+				<th>Opção</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for product in product_type.products %}
+		<tr class="{% if product.product_status == 'inactive' and status == 'inactive' %}table-warning{% elif status == 'inactive' %}table-success{% endif %}">
+			<td>{{ product.product_name | capitalize }}</td>
+			<td>{{ product.price | brl }}</td>
+			<td>
+				<form action="/manage/edit" method="get">
+					<input type="hidden" name="product-id" value="{{ product.id }}">
+					<button class="border btn mx-auto btn-light" type="submit">Editar</button>
+				</form>
+			</td>
+		</tr>
+		{% endfor %}
+			{% else %}
+		</thead>
+			{% endif %}
+		<tfoot>
+			<tr>
+				<td colspan="3">
+					<div class="mx-auto">
+						<table class="table table-borderless m-0">
+							<tr>
+								<td class="p-0">
+									<form action="/manage/edit" method="get">
+										<input type="hidden" name="product-type-id" value="{{ product_type.id }}">
+										<button class="border btn btn-dark mx-auto" type="submit">Editar</button>
+									</form>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+		</tfoot>
+	</table>
+</div>
+{% endif %}
+{% endfor %}
+
+{% endblock %}

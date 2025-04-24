@@ -2,3 +2,7 @@ nav .navbar-brand
 {
     font-size: x-large;
 }
+
+.text-black {
+    text-decoration-color: black;
+}

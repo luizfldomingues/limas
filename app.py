@@ -284,20 +284,37 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
-@app.route("/manage")
+@app.route("/manage/<status>")
+@app.route("/manage", defaults={"status": "active"})
 @login_required
-def manage():
-    product_types = db.execute("SELECT * FROM product_types "
-                               "WHERE type_status = 'active'")
-    for c in range(len(product_types)):
-        product_types[c]["products"] = db.execute("SELECT * "
-                                                  "FROM products "
-                                                  "WHERE product_type_id = ? "
-                                                  "AND product_status "
-                                                  "= 'active' "
-                                                  "ORDER BY price",
-                                                  product_types[c]["id"])
-    return render_template("manage.html", product_types=product_types)
+def manage(status):
+    # first time using variables in the url
+    # it may conflict with the /manage/edit url
+    # status = request.args.get("status")
+    if status == "active": 
+        product_types = db.execute("SELECT * FROM product_types "
+                                "WHERE type_status = 'active'")
+        for c in range(len(product_types)):
+            product_types[c]["products"] = db.execute("SELECT * "
+                                                    "FROM products "
+                                                    "WHERE product_type_id = ? "
+                                                    "AND product_status "
+                                                    "= 'active' "
+                                                    "ORDER BY price",
+                                                    product_types[c]["id"])
+        return render_template("manage.html", product_types=product_types)
+    elif status == "inactive":
+        product_types = db.execute("SELECT * FROM product_types")
+        for c in range(len(product_types)):
+            product_types[c]["products"] = db.execute("SELECT * "
+                                                    "FROM products "
+                                                    "WHERE product_type_id = ? "
+                                                    "AND product_status "
+                                                    "= 'inactive' "
+                                                    "ORDER BY price",
+                                                    product_types[c]["id"])
+        return render_template("manage.html", product_types=product_types, status=status)
+
 
 @app.route("/manage/edit", methods=["GET", "POST"])
 @login_required

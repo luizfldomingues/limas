@@ -6,29 +6,46 @@ Gerenciar
 
 {% block main %}
 
-<table class="table table-borderless">
-<tr>
-	<td>
-		<a href = "/manage/new/product">
-			<div class="border bg-success p-1" style="--bs-bg-opacity: .1;">
-				Novo produto	
-			</div>
-		</a>
+<table class="table">
+	<tr>
+		<td colspan="2">
+	{% if not status %}
+			<a href="/manage/inactive">
+				<div>
+					<button class="border btn btn-warning" type="text">Gerenciar os inativos</button>
+				</div>
+			</a>
+	{% else %}
+			<a href="/manage">
+				<div>
+					<button class="border btn btn-success" type="text">Gerenciar os ativos</button>
+				</div>
+			</a>
+	{% endif %}
+		</td>
 	</td>
-	<td>
-		<a href="/manage/new/product-type">
-			<div class="border bg-success p-1" style="--bs-bg-opacity: .1;">
-				Novo tipo de produto
-			</div>
-		</a>
-	</td>
-</tr>
+	<tr>
+		<td>
+			<a href = "/manage/new/product">
+				<div>
+					<button class="border btn btn-secondary" type="text">Novo produto</button>
+				</div>
+			</a>
+		</td>
+		<td>
+			<a href="/manage/new/product-type">
+				<div>
+					<button class="border btn btn-secondary" type="text">Novo tipo de produto</button>
+				</div>
+			</a>
+		</td>
+	</tr>
 </table>
 {% for product_type in product_types %}
 <div class="m-1 p-1">
 	<table class="table table-bordered table-striped">
 		<thead>
-			<tr class="table-primary">
+			<tr class="{% if product_type.type_status == 'active' %}table-success{% else %}table-warning{% endif %}">
 				<th colspan="3">{{ product_type.type_name | capitalize }}</th>
 			</tr>
 			{% if product_type.products %}
@@ -40,13 +57,13 @@ Gerenciar
 		</thead>
 		<tbody>
 		{% for product in product_type.products %}
-		<tr>
+		<tr class="{% if product.product_status == 'inactive' %}table-warning{% endif %}">
 			<td>{{ product.product_name | capitalize }}</td>
 			<td>{{ product.price | brl }}</td>
 			<td>
 				<form action="/manage/edit" method="get">
 					<input type="hidden" name="product-id" value="{{ product.id }}">
-					<button class="border btn mx-auto" type="submit">Editar</button>
+					<button class="border btn mx-auto btn-light" type="submit">Editar</button>
 				</form>
 			</td>
 		</tr>
@@ -63,7 +80,7 @@ Gerenciar
 								<td class="p-0">
 									<form action="/manage/edit" method="get">
 										<input type="hidden" name="product-type-id" value="{{ product_type.id }}">
-										<button class="border btn btn-warning mx-auto" type="submit">Editar</button>
+										<button class="border btn btn-dark mx-auto" type="submit">Editar</button>
 									</form>
 								</td>
 							</tr>

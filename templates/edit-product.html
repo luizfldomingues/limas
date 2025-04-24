@@ -41,7 +41,7 @@ Editar produto
                         <div>
                             <select class="form-control" name="product-type">
                                 {% for product_type in product_types %}
-                                <option {% if product_type.id == product.product_type_id %}selected{% endif %} value="{{ product_type.id }}">{{ product_type.product_type | capitalize }}</option>
+                                <option {% if product_type.id == product.product_type_id %}selected{% endif %} value="{{ product_type.id }}">{{ product_type.type_name | capitalize }}</option>
                                 {% endfor %}
                         </div>
                     </td>

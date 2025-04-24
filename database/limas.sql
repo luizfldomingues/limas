@@ -1,6 +1,6 @@
 CREATE TABLE product_types (
     id INTEGER PRIMARY KEY NOT NULL,
-    product_type TEXT NOT NULL,
+    type_name TEXT NOT NULL,
     type_status TEXT CHECK (type_status IN ('active', 'inactive')) NOT NULL DEFAULT 'active'
 );
 

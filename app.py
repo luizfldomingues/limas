@@ -227,7 +227,7 @@ def increment_order():
         product_types = db.execute("SELECT * FROM product_types")
         products = []
         for type in product_types:
-            products.append({"type": type["product_type"],
+            products.append({"type": type["type_name"],
                              "products": db.execute("SELECT id, product_name, "
                                                     "price FROM products "
                                                     "WHERE product_type_id = ?",
@@ -344,6 +344,7 @@ def manage_edit():
             flash(f"Produto N.º{product["id"]} editado com sucesso")
             return redirect("/manage")
         # A product_type_id is given
+
         elif request.form.get("product-type-id"):
             # Check if the product_type with given id exists
             product_type = db.execute("SELECT * FROM product_types "
@@ -353,7 +354,7 @@ def manage_edit():
                 return apology("Tipo de produto não encontrado")
             product_type = product_type[0]
             new_values = {
-                "name": request.form.get("product-type"),
+                "name": request.form.get("type-name"),
                 "status": request.form.get("type-status")
             }
             # Validate the new_values data
@@ -362,7 +363,7 @@ def manage_edit():
                 return apology("Algum dos valores enviados são incompatíveis")
             try:
                 db.execute("UPDATE product_types "
-                        "SET product_type = ?, "
+                        "SET type_name = ?, "
                         "type_status = ? "
                         "WHERE id = ?",
                         new_values["name"],
@@ -438,7 +439,7 @@ def new_order():
         product_types = db.execute("SELECT * FROM product_types")
         products = []
         for type in product_types:
-            products.append({"type": type["product_type"],
+            products.append({"type": type["type_name"],
                              "products": db.execute("SELECT id, product_name, "
                              "price FROM products "
                              "WHERE product_type_id = ?", type["id"])})

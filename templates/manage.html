@@ -9,7 +9,7 @@ Gerenciar
 <table class="table">
 	<tr>
 		<td colspan="2">
-	{% if not status %}
+	{% if status == 'active' %}
 			<a href="/manage/inactive">
 				<div>
 					<button class="border btn btn-warning" type="text">Gerenciar os inativos</button>
@@ -42,10 +42,11 @@ Gerenciar
 	</tr>
 </table>
 {% for product_type in product_types %}
+{% if (((product_type.products) or (status == 'active')) or product_type.type_status == 'inactive') %}
 <div class="m-1 p-1">
 	<table class="table table-bordered table-striped">
-		<thead>
-			<tr class="{% if product_type.type_status == 'active' %}table-success{% else %}table-warning{% endif %}">
+		<thead class="{% if product_type.type_status == 'active' and status == 'inactive' %}table-success{% elif status == 'inactive' %}table-warning{% endif %}">
+			<tr class="{% if status == 'active' %}table-primary{% endif %}">
 				<th colspan="3">{{ product_type.type_name | capitalize }}</th>
 			</tr>
 			{% if product_type.products %}
@@ -57,7 +58,7 @@ Gerenciar
 		</thead>
 		<tbody>
 		{% for product in product_type.products %}
-		<tr class="{% if product.product_status == 'inactive' %}table-warning{% endif %}">
+		<tr class="{% if product.product_status == 'inactive' and status == 'inactive' %}table-warning{% elif status == 'inactive' %}table-success{% endif %}">
 			<td>{{ product.product_name | capitalize }}</td>
 			<td>{{ product.price | brl }}</td>
 			<td>
@@ -91,6 +92,7 @@ Gerenciar
 		</tfoot>
 	</table>
 </div>
+{% endif %}
 {% endfor %}
 
 {% endblock %}

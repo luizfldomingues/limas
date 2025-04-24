@@ -289,6 +289,7 @@ def logout():
 @login_required
 def manage(status):
     # TODO: User can edit active products of inactive product types
+    # WORKING on
     if status == "active": 
         product_types = db.execute("SELECT * FROM product_types "
                                 "WHERE type_status = 'active'")
@@ -300,17 +301,24 @@ def manage(status):
                                                     "= 'active' "
                                                     "ORDER BY price",
                                                     product_types[c]["id"])
-        return render_template("manage.html", product_types=product_types)
+        return render_template("manage.html", product_types=product_types, status=status)
     elif status == "inactive":
         product_types = db.execute("SELECT * FROM product_types")
         for c in range(len(product_types)):
-            product_types[c]["products"] = db.execute("SELECT * "
-                                                    "FROM products "
-                                                    "WHERE product_type_id = ? "
-                                                    "AND product_status "
-                                                    "= 'inactive' "
-                                                    "ORDER BY price",
-                                                    product_types[c]["id"])
+            if product_types[c]["type_status"] == "active":
+                product_types[c]["products"] = db.execute("SELECT * "
+                                                        "FROM products "
+                                                        "WHERE product_type_id = ? "
+                                                        "AND product_status "
+                                                        "= 'inactive' "
+                                                        "ORDER BY price",
+                                                        product_types[c]["id"])
+            elif product_types[c]["type_status"] == "inactive":
+                product_types[c]["products"] = db.execute("SELECT * "
+                                                        "FROM products "
+                                                        "WHERE product_type_id = ? "
+                                                        "ORDER BY price",
+                                                        product_types[c]["id"])
         return render_template("manage.html", product_types=product_types, status=status)
 
 

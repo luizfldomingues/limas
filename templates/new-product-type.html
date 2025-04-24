@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Editar produto
+{% endblock %}
+
+{% block main %}
+<div class="mt-3">
+    <form action="/manage/new/product-type" method="post">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr class="table-primary">
+                    <td colspan="2" >
+                        Novo tipo de produto
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Nome do tipo:</th>
+                    <td>
+                        <div>
+                            <input class="form-control" name="type-name" type="text">
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">
+                        <button class="border btn btn-warning" type="submit">Criar tipo de pedido</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+</div>
+<div class="my-5">
+</div>
+{% endblock %}

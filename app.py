@@ -423,10 +423,9 @@ def manage_edit():
 
 @app.route("/manage/new/product", methods=["GET", "POST"])
 @login_required
-def manage_new_products():
+def manage_new_product():
     if request.method == "POST":
         # User wants to create a new product
-        # Check if the form is valid
         new_values = {
             "name": request.form.get("product-name"),
             "price": request.form.get("product-price"),
@@ -447,7 +446,7 @@ def manage_new_products():
                        new_values["price"],
                        new_values["type"])
         except Exception as exception:
-            return apology(f"Não foi possível registar o produto o produto: \n{exception}")
+            return apology(f"Não foi possível registar o produto: \n{exception}")
         flash(f"Produto registrado com sucesso")
         return redirect("/manage")
     # User reached route via get
@@ -456,6 +455,29 @@ def manage_new_products():
                                    "WHERE type_status = 'active'")
         return render_template("new-product.html", product_types=product_types)
 
+
+@app.route("/manage/new/product-type", methods=["GET", "POST"])
+@login_required
+def manage_new_product_type():
+    if request.method == "POST":
+        # User wants to create a new product type
+        type_name = request.form.get("type-name")
+
+        # Validate the new_values data
+        if not type_name:
+            return apology("Insira um nome para o tipo de produto")
+        try:
+            db.execute("INSERT INTO product_types "
+                       "(type_name) "
+                       "VALUES (?)",
+                       type_name)
+        except Exception as exception:
+            return apology(f"Não foi possível registar o tipo de produto: \n{exception}")
+        flash(f"Tipo de produto registrado com sucesso")
+        return redirect("/manage")
+        # User reached route via get
+    else:
+        return render_template("new-product-type.html")
 
 @app.route("/new-order", methods=["GET", "POST"])
 @login_required

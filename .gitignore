@@ -1,6 +1,9 @@
 # ignore all .db files in the current directory
 *.db
 
+# ignore files used to add specific products easier
+add*.sql
+
 # ignore __pycache__ and flask_session file created when the program runs
 __pycache__
 flask_session

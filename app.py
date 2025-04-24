@@ -304,6 +304,7 @@ def manage():
 def manage_edit():
     """Edit a product or product type"""
     if request.method == "POST":
+        # A product id is given
         if request.form.get("product-id"):
             # Check if the product with given id exists
             product = db.execute("SELECT * FROM products "
@@ -322,7 +323,7 @@ def manage_edit():
             if (not new_values["name"]
             or not new_values["price"].isnumeric() 
             or len(db.execute("SELECT id FROM product_types "
-                              "WHERE id=?",
+                              "WHERE id = ?",
                               new_values["type"])) != 1
             or not new_values["status"] in ["active", "inactive"]):
                 return apology("Algum dos valores enviados são incompatíveis")
@@ -342,9 +343,35 @@ def manage_edit():
                 return apology(f"Não foi possível editar o produto\n{exception}")
             flash(f"Produto N.º{product["id"]} editado com sucesso")
             return redirect("/manage")
+        # A product_type_id is given
         elif request.form.get("product-type-id"):
-            
-            return redirect("/")
+            # Check if the product_type with given id exists
+            product_type = db.execute("SELECT * FROM product_types "
+                                 "WHERE id = ?",
+                                 request.form.get("product-type-id"))
+            if len(product_type) != 1:
+                return apology("Tipo de produto não encontrado")
+            product_type = product_type[0]
+            new_values = {
+                "name": request.form.get("product-type"),
+                "status": request.form.get("type-status")
+            }
+            # Validate the new_values data
+            if (not new_values["name"]
+            or not new_values["status"] in ["active", "inactive"]):
+                return apology("Algum dos valores enviados são incompatíveis")
+            try:
+                db.execute("UPDATE product_types "
+                        "SET product_type = ?, "
+                        "type_status = ? "
+                        "WHERE id = ?",
+                        new_values["name"],
+                        new_values["status"],
+                        product_type["id"])   
+            except Exception as exception:
+                return apology(f"Não foi possível editar o tipo de produto\n{exception}")
+            flash(f"Tipo de produto N.º{product_type["id"]} editado com sucesso")
+            return redirect("/manage")
 
     # User reached route via GET
     else:

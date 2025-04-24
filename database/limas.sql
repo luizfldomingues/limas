@@ -1,12 +1,12 @@
 CREATE TABLE product_types (
     id INTEGER PRIMARY KEY NOT NULL,
-    type_name TEXT NOT NULL,
+    type_name TEXT NOT NULL UNIQUE,
     type_status TEXT CHECK (type_status IN ('active', 'inactive')) NOT NULL DEFAULT 'active'
 );
 
 CREATE TABLE products (
     id INTEGER PRIMARY KEY NOT NULL,
-    product_name TEXT NOT NULL,
+    product_name TEXT NOT NULL UNIQUE,
     product_type_id INTEGER NOT NULL,
     price INTEGER NOT NULL,
     product_status TEXT CHECK (product_status IN ('active', 'inactive')) NOT NULL DEFAULT 'active',

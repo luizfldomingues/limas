@@ -7,7 +7,7 @@ This project aims to be an efficient order manager for dine-in establishment, e.
 
 ## How to run
 
-After downloading the project files, go to database folder and run:
+After downloading the project files, make sure you have all dependencies installed, then go to database folder and run:
 ```console
 sqlite3 limas.db
 ```
@@ -33,3 +33,26 @@ The project design's goal is to be the most intuitive as possible. Currently, al
 
 The project depends on some python packages, including cs50, flask, flask_session, werkzeug.security etc.
 
+
+In order to make it easier for you to execute the program, there's a requirements.txt file that can help you manage the python dependencies. The recomended way to use it is in a python venv.
+
+To create a python venv, activate it and install the dependencies, follow:
+
+Create the python venv and activate it (in the project root folder):
+```console
+python -m venv .venv
+```
+
+Then activate it:
+```console
+source .venv/bin/activate
+```
+
+Now, you can install the dependencies in a python virtual enviroment from the requirements.txt file:
+```console
+pip install -r requirements.txt
+```
+
+This way, you should have all python dependencies installed.
+
+If you want to run the program again later, in another bash section, just active the virtual environment as shown above, and all dependencies are meant to still be in that enviroment.

@@ -7,7 +7,6 @@ class Database:
         def new_database():
             with open('database/limas.sql', 'r') as sql_file:
                 sql_script = sql_file.read()
-                print(sql_script)
                 with sqlite3.connect(self.db_path) as con:
                     cur = con.cursor()
                     cur.executescript(sql_script)

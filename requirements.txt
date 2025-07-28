@@ -1,7 +1,6 @@
 blinker==1.9.0
 cachelib==0.13.0
 click==8.2.1
-cs50==9.4.0
 Flask==3.1.1
 Flask-Session==0.8.0
 greenlet==3.2.2

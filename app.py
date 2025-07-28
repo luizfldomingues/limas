@@ -292,10 +292,10 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
-@app.route("/manage/<status>")
-@app.route("/manage", defaults={"status": "active"})
+@app.route("/products/<status>")
+@app.route("/products", defaults={"status": "active"})
 @login_required
-def manage(status):
+def products(status):
     # TODO: User can edit active products of inactive product types
     # WORKING on
     if status == "active": 
@@ -309,7 +309,7 @@ def manage(status):
                                                     "= 'active' "
                                                     "ORDER BY price",
                                                     product_types[c]["id"])
-        return render_template("manage.html", product_types=product_types, status=status)
+        return render_template("products.html", product_types=product_types, status=status)
     elif status == "inactive":
         product_types = db.execute("SELECT * FROM product_types")
         for c in range(len(product_types)):
@@ -327,12 +327,12 @@ def manage(status):
                                                         "WHERE product_type_id = ? "
                                                         "ORDER BY price",
                                                         product_types[c]["id"])
-        return render_template("manage.html", product_types=product_types, status=status)
+        return render_template("products.html", product_types=product_types, status=status)
 
 
-@app.route("/manage/edit", methods=["GET", "POST"])
+@app.route("/products/edit", methods=["GET", "POST"])
 @login_required
-def manage_edit():
+def products_edit():
     """Edit a product or product type"""
     if request.method == "POST":
         # A product id is given
@@ -373,7 +373,7 @@ def manage_edit():
             except Exception as exception:
                 return apology(f"Não foi possível editar o produto\n{exception}")
             flash(f"Produto N.º{product["id"]} editado com sucesso")
-            return redirect("/manage")
+            return redirect("/products")
         # A product_type_id is given
 
         elif request.form.get("product-type-id"):
@@ -403,7 +403,7 @@ def manage_edit():
             except Exception as exception:
                 return apology(f"Não foi possível editar o tipo de produto\n{exception}")
             flash(f"Tipo de produto N.º{product_type["id"]} editado com sucesso")
-            return redirect("/manage")
+            return redirect("/products")
 
     # User reached route via GET
     else:
@@ -437,9 +437,9 @@ def manage_edit():
             return render_template("edit-product-type.html", product_type=product_type)
 
 
-@app.route("/manage/new/product", methods=["GET", "POST"])
+@app.route("/products/new/product", methods=["GET", "POST"])
 @login_required
-def manage_new_product():
+def products_new_product():
     if request.method == "POST":
         # User wants to create a new product
         new_values = {
@@ -464,7 +464,7 @@ def manage_new_product():
         except Exception as exception:
             return apology(f"Não foi possível registar o produto: \n{exception}")
         flash(f"Produto registrado com sucesso")
-        return redirect("/manage")
+        return redirect("/products")
     # User reached route via get
     else:
         product_types = db.execute("SELECT * FROM product_types "
@@ -472,9 +472,9 @@ def manage_new_product():
         return render_template("new-product.html", product_types=product_types)
 
 
-@app.route("/manage/new/product-type", methods=["GET", "POST"])
+@app.route("/products/new/product-type", methods=["GET", "POST"])
 @login_required
-def manage_new_product_type():
+def products_new_product_type():
     if request.method == "POST":
         # User wants to create a new product type
         type_name = request.form.get("type-name")
@@ -490,7 +490,7 @@ def manage_new_product_type():
         except Exception as exception:
             return apology(f"Não foi possível registar o tipo de produto: \n{exception}")
         flash(f"Tipo de produto registrado com sucesso")
-        return redirect("/manage")
+        return redirect("/products")
         # User reached route via get
     else:
         return render_template("new-product-type.html")

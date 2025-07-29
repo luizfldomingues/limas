@@ -322,7 +322,6 @@ def manage_edit():
             if len(product_type) != 1:
                 return apology("Tipo de produto não encontrado")
             product_type = product_type[0]
-            product_type["active_products"] = db.count_active_products_by_type(product_type["id"])
             return render_template("edit-product-type.html", product_type=product_type)
 
 

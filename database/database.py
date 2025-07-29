@@ -135,8 +135,11 @@ class Database:
         return [dict(row) for row in rows]
 
     def get_product_types(self):
-        """Retrieves all product types from the database."""
-        rows = self._execute_query("SELECT * FROM product_types")
+        """Retrieves all active product types with at least one active product."""
+        rows = self._execute_query("SELECT pt_id id, type_name, type_status FROM ("
+                                   "SELECT id pt_id, type_name, type_status FROM product_types "
+                                   "WHERE (SELECT COUNT(*) FROM products WHERE product_type_id = pt_id AND product_status = 'active') > 0 "
+                                   "AND type_status = 'active')")
         return [dict(row) for row in rows]
 
     def get_products_by_type(self, type_id):
@@ -200,15 +203,6 @@ class Database:
     def update_product_type(self, name, status, type_id):
         """Updates the name and status of a specific product type."""
         self._execute_query("UPDATE product_types SET type_name = ?, type_status = ? WHERE id = ?", (name, status, type_id))
-
-    def count_active_products_by_type(self, type_id):
-        """Counts the number of active products for a given product type."""
-        row = self._execute_query(
-            "SELECT COUNT(id) as count FROM products WHERE product_type_id = ? AND product_status = 'active'",
-            (type_id,),
-            fetchone=True
-        )
-        return row['count'] if row else 0
 
     def create_product(self, name, price, type_id):
         """Creates a new product in the database."""

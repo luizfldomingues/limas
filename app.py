@@ -36,7 +36,6 @@ def index():
                             orders=pending_orders, 
                             order_products=order_products)
 
-
 @app.route("/edit-order", methods=["GET", "POST"])
 @login_required
 def edit_order():
@@ -182,8 +181,6 @@ def increment_order():
         return render_template("increment-order.html", products=products,
                                order=order, order_id=order_id)
 
-
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -219,7 +216,6 @@ def login():
     else:
         return render_template("login.html")
 
-
 @app.route("/logout")
 def logout():
     """Log user out"""
@@ -237,19 +233,15 @@ def manage(status):
     # TODO: User can edit active products of inactive product types
     # WORKING on
     if status == "active": 
-        product_types = db.get_active_product_types()
-        for c in range(len(product_types)):
-            product_types[c]["products"] = db.get_active_products_by_type(product_types[c]["id"])
-        return render_template("manage.html", product_types=product_types, status=status)
-    elif status == "inactive":
         product_types = db.get_product_types()
         for c in range(len(product_types)):
-            if product_types[c]["type_status"] == "active":
-                product_types[c]["products"] = db.get_inactive_products_by_active_type(product_types[c]["id"])
-            elif product_types[c]["type_status"] == "inactive":
-                product_types[c]["products"] = db.get_all_products_by_inactive_type(product_types[c]["id"])
+            product_types[c]["products"] = db.get_products_by_type(product_types[c]["id"])
         return render_template("manage.html", product_types=product_types, status=status)
-
+    elif status == "inactive":
+        product_types = db.get_inactive_product_types()
+        for c in range(len(product_types)):
+            product_types[c]["products"] = db.get_inactive_products_by_type(product_types[c]["id"])
+        return render_template("manage.html", product_types=product_types, status=status)
 
 @app.route("/manage/edit", methods=["GET", "POST"])
 @login_required
@@ -324,7 +316,6 @@ def manage_edit():
             product_type = product_type[0]
             return render_template("edit-product-type.html", product_type=product_type)
 
-
 @app.route("/manage/new/product", methods=["GET", "POST"])
 @login_required
 def manage_new_product():
@@ -350,7 +341,6 @@ def manage_new_product():
     else:
         product_types = db.get_active_product_types()
         return render_template("new-product.html", product_types=product_types)
-
 
 @app.route("/manage/new/product-type", methods=["GET", "POST"])
 @login_required

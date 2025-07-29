@@ -136,15 +136,14 @@ class Database:
 
     def get_product_types(self):
         """Retrieves all active product types with at least one active product."""
-        rows = self._execute_query("SELECT pt_id id, type_name, type_status FROM ("
-                                   "SELECT id pt_id, type_name, type_status FROM product_types "
-                                   "WHERE (SELECT COUNT(*) FROM products WHERE product_type_id = pt_id AND product_status = 'active') > 0 "
-                                   "AND type_status = 'active')")
+        rows = self._execute_query("SELECT * FROM product_types pt "
+                                   "WHERE EXISTS (SELECT 1 FROM products p WHERE p.product_type_id = pt.id AND p.product_status = 'active') "
+                                   "AND type_status = 'active'")
         return [dict(row) for row in rows]
 
     def get_products_by_type(self, type_id):
-        """Retrieves all products belonging to a specific product type."""
-        rows = self._execute_query("SELECT id, product_name, price FROM products WHERE product_type_id = ?", (type_id,))
+        """Retrieves all (active) products belonging to a specific product type."""
+        rows = self._execute_query("SELECT * FROM products WHERE product_type_id = ? AND product_status = 'active'", (type_id,))
         return [dict(row) for row in rows]
 
     def get_user_by_username(self, username):
@@ -157,12 +156,18 @@ class Database:
         rows = self._execute_query("SELECT * FROM product_types WHERE type_status = 'active'")
         return [dict(row) for row in rows]
 
-    def get_active_products_by_type(self, type_id):
-        """Retrieves all active products of a specific product type."""
-        rows = self._execute_query(
-            "SELECT * FROM products WHERE product_type_id = ? AND product_status = 'active' ORDER BY price",
-            (type_id,)
-        )
+    def get_inactive_product_types(self):
+        """Retrieves all product types with an 'inactive' status or with inactive products"""
+        rows = self._execute_query("SELECT * FROM product_types pt WHERE type_status = 'inactive' "
+                                   "OR EXISTS (SELECT 1 FROM products p WHERE p.product_type_id = pt.id AND p.product_status = 'inactive')")
+        return [dict(row) for row in rows]
+
+    def get_inactive_products_by_type(self, type_id):
+        """Retrieves all products that are inative or from an inactive type by a type"""
+        rows = self._execute_query("SELECT * FROM products p WHERE product_status = 'inactive' "
+                                   "OR EXISTS (SELECT 1 FROM product_types pt "
+                                   "WHERE p.product_type_id = ? AND pt.type_status = 'inactive')",
+                                   (type_id,))
         return [dict(row) for row in rows]
 
     def get_inactive_products_by_active_type(self, type_id):

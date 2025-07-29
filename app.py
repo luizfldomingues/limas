@@ -230,8 +230,6 @@ def logout():
 @app.route("/manage", defaults={"status": "active"})
 @login_required
 def manage(status):
-    # TODO: User can edit active products of inactive product types
-    # WORKING on
     if status == "active": 
         product_types = db.get_product_types()
         for c in range(len(product_types)):

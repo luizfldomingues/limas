@@ -44,7 +44,7 @@ Produtos
 {% for product_type in product_types %}
 {% if (((product_type.products) or (status == 'active')) or product_type.type_status == 'inactive') %}
 <div class="m-1 p-1">
-	<table class="table table-bordered table-striped">
+	<table class="table table-bordered table-striped {% if product_type.type_status == 'active' and status == 'inactive' %}table-success{% elif status == 'inactive' %}table-warning{% endif %}">
 		<thead class="{% if product_type.type_status == 'active' and status == 'inactive' %}table-success{% elif status == 'inactive' %}table-warning{% endif %}">
 			<tr class="{% if status == 'active' %}table-primary{% endif %}">
 				<th colspan="3">{{ product_type.type_name | capitalize }}</th>
@@ -76,16 +76,10 @@ Produtos
 			<tr>
 				<td colspan="3">
 					<div class="mx-auto">
-						<table class="table table-borderless m-0">
-							<tr>
-								<td class="p-0">
-									<form action="/products/edit" method="get">
-										<input type="hidden" name="product-type-id" value="{{ product_type.id }}">
-										<button class="border btn btn-dark mx-auto" type="submit">Editar</button>
-									</form>
-								</td>
-							</tr>
-						</table>
+            <form action="/products/edit" method="get">
+              <input type="hidden" name="product-type-id" value="{{ product_type.id }}">
+              <button class="border btn btn-dark mx-auto" type="submit">Editar</button>
+            </form>
 					</div>
 				</td>
 			</tr>

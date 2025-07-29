@@ -234,30 +234,12 @@ def products(status):
         product_types = db.get_product_types()
         for c in range(len(product_types)):
             product_types[c]["products"] = db.get_products_by_type(product_types[c]["id"])
-        return render_template("product.html", product_types=product_types, status=status)
+        return render_template("products.html", product_types=product_types, status=status)
     elif status == "inactive":
         product_types = db.get_inactive_product_types()
         for c in range(len(product_types)):
             product_types[c]["products"] = db.get_inactive_products_by_type(product_types[c]["id"])
-        return render_template("manage.html", product_types=product_types, status=status)
-
-@app.route("/manage/edit", methods=["GET", "POST"])
-            if product_types[c]["type_status"] == "active":
-                product_types[c]["products"] = db.execute("SELECT * "
-                                                        "FROM products "
-                                                        "WHERE product_type_id = ? "
-                                                        "AND product_status "
-                                                        "= 'inactive' "
-                                                        "ORDER BY price",
-                                                        product_types[c]["id"])
-            elif product_types[c]["type_status"] == "inactive":
-                product_types[c]["products"] = db.execute("SELECT * "
-                                                        "FROM products "
-                                                        "WHERE product_type_id = ? "
-                                                        "ORDER BY price",
-                                                        product_types[c]["id"])
         return render_template("products.html", product_types=product_types, status=status)
-
 
 @app.route("/products/edit", methods=["GET", "POST"])
 @login_required

@@ -34,7 +34,7 @@ CREATE TABLE order_increments (
     order_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     increment_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES orders(id)
+    FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Gerenciar
+Produtos
 {% endblock %}
 
 {% block main %}
@@ -10,13 +10,13 @@ Gerenciar
 	<tr>
 		<td colspan="2">
 	{% if status == 'active' %}
-			<a href="/manage/inactive">
+			<a href="/products/inactive">
 				<div>
 					<button class="border btn btn-warning" type="text">Gerenciar os inativos</button>
 				</div>
 			</a>
 	{% else %}
-			<a href="/manage">
+			<a href="/products">
 				<div>
 					<button class="border btn btn-success" type="text">Gerenciar os ativos</button>
 				</div>
@@ -26,14 +26,14 @@ Gerenciar
 	</td>
 	<tr>
 		<td>
-			<a href="/manage/new/product-type">
+			<a href="/products/new/product-type">
 				<div>
 					<button class="border btn btn-secondary" type="text">Novo tipo de produto</button>
 				</div>
 			</a>
 		</td>
 		<td>
-			<a href = "/manage/new/product">
+			<a href = "/products/new/product">
 				<div>
 					<button class="border btn btn-secondary" type="text">Novo produto</button>
 				</div>
@@ -62,7 +62,7 @@ Gerenciar
 			<td>{{ product.product_name | capitalize }}</td>
 			<td>{{ product.price | brl }}</td>
 			<td>
-				<form action="/manage/edit" method="get">
+				<form action="/products/edit" method="get">
 					<input type="hidden" name="product-id" value="{{ product.id }}">
 					<button class="border btn mx-auto btn-light" type="submit">Editar</button>
 				</form>
@@ -79,7 +79,7 @@ Gerenciar
 						<table class="table table-borderless m-0">
 							<tr>
 								<td class="p-0">
-									<form action="/manage/edit" method="get">
+									<form action="/products/edit" method="get">
 										<input type="hidden" name="product-type-id" value="{{ product_type.id }}">
 										<button class="border btn btn-dark mx-auto" type="submit">Editar</button>
 									</form>

@@ -49,3 +49,5 @@ CREATE TABLE order_products (
     FOREIGN KEY (product_id) REFERENCES products(id),
     FOREIGN KEY (order_increment_id) REFERENCES order_increments(id)
 );
+
+--TODO: Add indexes on tables

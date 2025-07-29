@@ -6,8 +6,25 @@ Editar pedido
 
 {% block main %}
     <form action="/edit-order" method="post">
-        <span>
+        <span class="center">
             <input type="hidden" name="order-id" value="{{ order.id }}">
+            <table class="table">
+                <thead>
+                  <th>Nº da mesa</th>
+                  <th>Nome do cliente</th>
+                <tr>
+                      <td>
+                          <div class="mx-auto" style="max-width: 8rem;">
+                              <input class="form-control" name="table-number" value="{{ order.table_number }}" type="number" style="max-width: 8rem;">
+                          </div>
+                      </td>
+                      <td>
+                          <div class="mx-auto" style="max-width: 8rem;">
+                              <input class="form-control" name="customer" value="{{ order.customer_name }}" type="text" style="max-width: 8rem;">
+                          </div>
+                      </td>
+                </tr>
+            </table>
         </span>
         <div class="py-1 my-1">
             <table class="table table-bordered table-striped">
@@ -18,22 +35,6 @@ Editar pedido
 
                 </thead>
                 <thead class="thead">
-                    <tr>
-                        <th colspan="1">Nº da mesa:</th>
-                        <td colspan="2">
-                            <div class="mx-auto" style="max-width: 8rem;">
-                                <input class="form-control" name="table-number" value="{{ order.table_number }}" type="number" style="max-width: 8rem;">
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th colspan="1">Nome do cliente</th>
-                        <td colspan="2">
-                            <div class="mx-auto" style="max-width: 8rem;">
-                                <input class="form-control" name="customer" value="{{ order.customer_name }}" type="text" style="max-width: 8rem;">
-                            </div>
-                        </td>
-                    </tr>
                     <tr>
                         <th>Produto</th>
                         <th>Preço</th>

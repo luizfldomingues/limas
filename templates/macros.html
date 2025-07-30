@@ -1,10 +1,32 @@
 {% macro edit_order(action, products, edit_customer_info=False, order=False, color="primary", confirm_button="Confirmar") %}
     <div class="d-flex flex-row justify-content-around w-100">
         <div class="w-50 p-2">
-            <div class="border">Test</div>
+            <div class="border rounded p-3">
+                <h4>Pedido Atual</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Preço</th>
+                            <th>Quantidade</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="current-order-body">
+                        <!-- Produtos adicionados aparecerão aqui -->
+                    </tbody>
+                </table>
+                <div class="form-group">
+                    <label for="observation">Observação</label>
+                    <textarea class="form-control" id="observation" name="observation" rows="3"></textarea>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <h5>Total: <span id="total-price">{{ 0 | brl }}</span></h5>
+                </div>
+            </div>
         </div>
         <div class="w-50 p-2">
-            <form action="{{ action }}" method="post">
+            <form action="{{ action }}" method="post" id="order-form">
                 {% if order %}
                 <span>
                     <input type="hidden" name="order-id" value="{{ order.id }}">
@@ -34,57 +56,27 @@
                         </tbody>
                     </table>
                 {% endif %}
+                <div class="mb-3">
+                    <input type="text" id="product-search" class="form-control" placeholder="Buscar por nome ou tipo de produto...">
+                </div>
                 <div class="border rounded" style="max-height: 50vh; overflow-y: auto;">
                     <table class="table table-bordered table-striped mb-0">
-                        {% if order %}
-                        <thead>
-                            <tr class="table-{{ color }}">
-                              <th colspan="3">Pedido N.º{{ order.id }}
-                                  {% if order.table_number %}
-                                  - Mesa {{ order.table_number }}
-                                  {% endif %}
-                                  {% if order.customer_name %}
-                                  - {{ order.customer_name | capitalize }}
-                                  {% endif %}
-                              </th>
-                            </tr>
-                        </thead>
-                        {% endif %}
+                        <tbody id="product-catalog-body">
                     {% for type in products %}
-                        <tbody class="thead">
-                            <tr>
-                                <th colspan="3">{{ type.type | capitalize }}</th>
-                            </tr>
-                            <tr>
-                                <th>Produto</th>
-                                <th>Preço</th>
-                                <th>Quantidade</th>
-                            </tr>
-                        </tbody>
-                        <tbody>
+                        <tr class="product-type-header">
+                            <th colspan="3">{{ type.type | capitalize }}</th>
+                        </tr>
                         {% for product in type.products %}
-                        <tr>
+                        <tr class="product-row" data-name="{{ product.product_name | lower }}" data-type="{{ type.type | lower }}">
                             <td>{{product.product_name | capitalize }}</td>
                             <td>{{ product.price | brl }}</td>
                             <td>
-                                    <div class="mx-auto" style="max-width: 4rem;">
-                                    <input class="form-control quantity-input" name="{{ product.id }}" style="max-width: 4rem;" type="number" min="0" data-price="{{ product.price }}">
-                                </div>
+                                <button type="button" class="btn btn-sm btn-primary add-product-btn" data-id="{{ product.id }}" data-name="{{ product.product_name }}" data-price="{{ product.price }}">Adicionar</button>
                             </td>
                         </tr>
                         {% endfor %}
+                    {% endfor %}
                         </tbody>
-                {% endfor %}
-                        <tfoot>
-                            <tr>
-                                <th colspan="2" class="text-center">Total</th>
-                                <th>
-                                    <div class="mx-auto" id="pre-total">
-                                        {{ 0 | brl }}
-                                    </div>
-                                </th>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
                 <button class="border btn btn-{{ color }} mt-3" type="submit">{{ confirm_button }}</button>

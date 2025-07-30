@@ -1,9 +1,9 @@
 {% macro edit_order(action, products, edit_customer_info=False, order=False, color="primary", confirm_button="Confirmar") %}
-    <div class="flex d-flex flex-row justify-content-around w-100 vh-10 overflow-auto">
-        <div class="">
-          <div class="border">Test</div>
+    <div class="d-flex flex-row justify-content-around w-100">
+        <div class="w-50 p-2">
+            <div class="border">Test</div>
         </div>
-        <div class="vh-50 overflow-auto">
+        <div class="w-50 p-2">
             <form action="{{ action }}" method="post">
                 {% if order %}
                 <span>
@@ -34,8 +34,8 @@
                         </tbody>
                     </table>
                 {% endif %}
-                <div class="py-1 my-1">
-                    <table class="table table-bordered table-striped">
+                <div class="border rounded" style="max-height: 50vh; overflow-y: auto;">
+                    <table class="table table-bordered table-striped mb-0">
                         {% if order %}
                         <thead>
                             <tr class="table-{{ color }}">
@@ -87,7 +87,7 @@
                         </tfoot>
                     </table>
                 </div>
-                <button class="border btn btn-{{ color }}" type="submit">{{ confirm_button }}</button>
+                <button class="border btn btn-{{ color }} mt-3" type="submit">{{ confirm_button }}</button>
             </form>
         </div>
     </div>

@@ -5,57 +5,6 @@ Editar pedido
 {% endblock %}
 
 {% block main %}
-    <form action="/edit-order" method="post">
-        <span class="center">
-            <input type="hidden" name="order-id" value="{{ order.id }}">
-            <table class="table">
-                <thead>
-                  <th>Nº da mesa</th>
-                  <th>Nome do cliente</th>
-                <tr>
-                      <td>
-                          <div class="mx-auto" style="max-width: 8rem;">
-                              <input class="form-control" name="table-number" value="{{ order.table_number }}" type="number" style="max-width: 8rem;">
-                          </div>
-                      </td>
-                      <td>
-                          <div class="mx-auto" style="max-width: 8rem;">
-                              <input class="form-control" name="customer" value="{{ order.customer_name }}" type="text" style="max-width: 8rem;">
-                          </div>
-                      </td>
-                </tr>
-            </table>
-        </span>
-        <div class="py-1 my-1">
-            <table class="table table-bordered table-striped">
-                <thead class="thead table-warning">
-                    <tr>
-                        <th colspan="3">Pedido N.º{{ order.id }}</th>
-                    </tr>
-
-                </thead>
-                <thead class="thead">
-                    <tr>
-                        <th>Produto</th>
-                        <th>Preço</th>
-                        <th>Quantidade</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for product in order_products %}
-                <tr>
-                    <td>{{product.product_name | capitalize }}</td>
-                    <td>{{ product.current_price | brl }}</td>
-                    <td>
-                            <div class="mx-auto" style="max-width: 4rem;">
-                                <input class="form-control" name="{{ product.id }}" style="max-width: 4rem;" type="number" value="{{ product.quantity }}">
-                            </div>
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <button class="border btn btn-warning" type="submit">Confirmar Edição</button>
-    </form>
+{% from "macros.html" import edit_order %}
+{{edit_order(action="/edit-order", products=products, edit_customer_info=True, order=order)}}
 {% endblock %}

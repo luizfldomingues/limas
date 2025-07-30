@@ -488,7 +488,12 @@ def order_details():
         "order-details.html", order=order, increments=increments, details=details
     )
 
-
+@app.route("/point-of-sale")
+@login_required
+def point_of_sale():
+    """ Page for managing the point of sale """
+    flash("TODO")
+    return render_template("blank.html")
 @app.route("/reports")
 @login_required
 def reports():

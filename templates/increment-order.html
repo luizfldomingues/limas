@@ -11,5 +11,5 @@ Incrementar pedido
 
 {% block main %}
 {% from "macros.html" import edit_order %}
-{{edit_order("/increment-order", products, False, order_id)}}
+{{edit_order(action="/increment-order", products=products, edit_customer_info=False, order=order, color="success", confirm_button="Incrementar pedido")}}
 {% endblock %}

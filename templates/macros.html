@@ -1,4 +1,4 @@
-{% macro edit_order(action, products, edit_customer_info=False, order=False) %}
+{% macro edit_order(action, products, edit_customer_info=False, order=False, color="primary", confirm_button="Confirmar") %}
     <form action="{{ action }}" method="post">
         {% if order %}
         <span>
@@ -26,8 +26,13 @@
         {% endif %}
         <div class="py-1 my-1">
             <table class="table table-bordered table-striped">
+                {% if order %}
+                <thead>
+                <tr class="table-{{ color }}"><th colspan="3">Pedido N.º{{ order.id }}</th></tr>
+                </thead>
+                {% endif %}
             {% for type in products %}
-                <thead class="thead-dark">
+                <tbody class="thead">
                     <tr>
                         <th colspan="3">{{ type.type | capitalize }}</th>
                     </tr>
@@ -36,7 +41,7 @@
                         <th>Preço</th>
                         <th>Quantidade</th>
                     </tr>
-                </thead>
+                </tbody>
                 <tbody>
                 {% for product in type.products %}
                 <tr>
@@ -63,6 +68,6 @@
                 </tfoot>
             </table>
         </div>
-        <button class="border btn btn-primary" type="submit">Registrar Pedido</button>
+        <button class="border btn btn-{{ color }}" type="submit">{{ confirm_button }}</button>
     </form>
 {% endmacro %}

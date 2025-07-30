@@ -5,6 +5,7 @@ from database.database import db
 
 from helpers import apology, brl, login_required
 import preferences
+
 # Configure application
 app = Flask(__name__)
 
@@ -17,6 +18,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+
 # TODO: understand what this means
 @app.after_request
 def after_request(response):
@@ -26,15 +28,17 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+
 @app.route("/")
 @login_required
 def index():
     # Request the list of pending orders and the list of products
     pending_orders = db.get_pending_orders()
     order_products = db.list_products(pending_orders)
-    return render_template("index.html",
-                            orders=pending_orders, 
-                            order_products=order_products)
+    return render_template(
+        "index.html", orders=pending_orders, order_products=order_products
+    )
+
 
 @app.route("/edit-order", methods=["GET", "POST"])
 @login_required
@@ -60,18 +64,21 @@ def edit_order():
         for actual_product in actual_products:
             if request.form.get(str(actual_product["id"])):
                 if request.form.get(str(actual_product["id"])).isnumeric():
-                    intended_products[actual_product["id"]] = (
-                    int(request.form.get(str((actual_product["id"])))))
+                    intended_products[actual_product["id"]] = int(
+                        request.form.get(str((actual_product["id"])))
+                    )
                 else:
                     intended_products[actual_product["id"]] = 0
         # Populates the increment_products list
         for actual_product in actual_products:
             if type(intended_products.get(actual_product["id"])) != None:
-                quantity = (intended_products[actual_product["id"]] -
-                            int(actual_product["quantity"]))
+                quantity = intended_products[actual_product["id"]] - int(
+                    actual_product["quantity"]
+                )
                 if quantity != 0:
-                    increment_products.append({"id": actual_product["id"],
-                                               "quantity": quantity})
+                    increment_products.append(
+                        {"id": actual_product["id"], "quantity": quantity}
+                    )
         db.update_order(order_id, customer, table)
         db.add_order_products(order_id, increment_products)
         flash(f"Pedido Nº.{order_id} editado com sucesso")
@@ -83,8 +90,12 @@ def edit_order():
         if len(order) != 1:
             return apology("Pedido não encontrado")
         order_products = db.list_products(order)
-        return render_template("edit-order.html", order=order[0],
-                               order_products=order_products[int(order_id)])
+        return render_template(
+            "edit-order.html",
+            order=order[0],
+            order_products=order_products[int(order_id)],
+        )
+
 
 @app.route("/modify-order-status", methods=["POST"])
 @login_required
@@ -104,8 +115,7 @@ def delete_order():
     if action == "complete":
         try:
             db.update_order_status(order_id, "completed")
-            flash(f"Pedido N.º {order_id} "
-                    "completado com sucesso")
+            flash(f"Pedido N.º {order_id} completado com sucesso")
         except:
             return apology("Algo deu errado com a mudança do status do pedido")
         return redirect("/")
@@ -116,6 +126,7 @@ def delete_order():
             return apology("Não foi possível reabrir o pedido")
         flash(f"Pedido Nº.{order_id} reaberto com sucesso")
         return redirect("/")
+
 
 @app.route("/history")
 @login_required
@@ -134,11 +145,16 @@ def history():
         for order in orders:
             total_sold += order["total"]
 
-        return render_template("history.html", orders=orders,
-                               order_products=order_products,
-                               total=total_sold, since=since_date)
+        return render_template(
+            "history.html",
+            orders=orders,
+            order_products=order_products,
+            total=total_sold,
+            since=since_date,
+        )
     else:
         return render_template("query-history.html")
+
 
 @app.route("/increment-order", methods=["GET", "POST"])
 @login_required
@@ -156,9 +172,12 @@ def increment_order():
             for product in request.form:
                 if product.isnumeric() and request.form.get(product).isnumeric():
                     if int(request.form.get(product)) > 0:
-                        increment_products.append({"id": int(product), 
-                                                   "quantity": int(request.form
-                                                                   .get(product))})
+                        increment_products.append(
+                            {
+                                "id": int(product),
+                                "quantity": int(request.form.get(product)),
+                            }
+                        )
         except:
             return apology("Não foi possível registrar o produto")
 
@@ -175,15 +194,20 @@ def increment_order():
         product_types = db.get_product_types()
         products = []
         for type in product_types:
-            products.append({"type": type["type_name"],
-                             "products": db.get_products_by_type(type["id"])})
-        order=order[0]
-        return render_template("increment-order.html", products=products,
-                               order=order, order_id=order_id)
+            products.append(
+                {
+                    "type": type["type_name"],
+                    "products": db.get_products_by_type(type["id"]),
+                }
+            )
+        order = order[0]
+        return render_template(
+            "increment-order.html", products=products, order=order, order_id=order_id
+        )
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-
     if session.get("user_id"):
         # Clear the user session
         session.clear()
@@ -216,6 +240,7 @@ def login():
     else:
         return render_template("login.html")
 
+
 @app.route("/logout")
 def logout():
     """Log user out"""
@@ -226,20 +251,30 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
+
 @app.route("/products/<status>")
 @app.route("/products", defaults={"status": "active"})
 @login_required
 def products(status):
-    if status == "active": 
+    if status == "active":
         product_types = db.get_product_types()
         for c in range(len(product_types)):
-            product_types[c]["products"] = db.get_products_by_type(product_types[c]["id"])
-        return render_template("products.html", product_types=product_types, status=status)
+            product_types[c]["products"] = db.get_products_by_type(
+                product_types[c]["id"]
+            )
+        return render_template(
+            "products.html", product_types=product_types, status=status
+        )
     elif status == "inactive":
         product_types = db.get_inactive_product_types()
         for c in range(len(product_types)):
-            product_types[c]["products"] = db.get_inactive_products_by_type(product_types[c]["id"])
-        return render_template("products.html", product_types=product_types, status=status)
+            product_types[c]["products"] = db.get_inactive_products_by_type(
+                product_types[c]["id"]
+            )
+        return render_template(
+            "products.html", product_types=product_types, status=status
+        )
+
 
 @app.route("/products/edit", methods=["GET", "POST"])
 @login_required
@@ -257,41 +292,57 @@ def products_edit():
                 "name": request.form.get("product-name"),
                 "price": request.form.get("product-price"),
                 "type": request.form.get("product-type"),
-                "status": request.form.get("product-status")
+                "status": request.form.get("product-status"),
             }
             # Validate the new_values data
-            if (not new_values["name"]
-            or not new_values["price"].isnumeric() 
-            or len(db.get_product_type_by_id(new_values["type"])) != 1
-            or not new_values["status"] in ["active", "inactive"]):
+            if (
+                not new_values["name"]
+                or not new_values["price"].isnumeric()
+                or len(db.get_product_type_by_id(new_values["type"])) != 1
+                or not new_values["status"] in ["active", "inactive"]
+            ):
                 return apology("Algum dos valores enviados são incompatíveis")
             try:
-                db.update_product(new_values["name"], new_values["price"], new_values["type"], new_values["status"], product["id"])   
+                db.update_product(
+                    new_values["name"],
+                    new_values["price"],
+                    new_values["type"],
+                    new_values["status"],
+                    product["id"],
+                )
             except Exception as exception:
                 return apology(f"Não foi possível editar o produto\n{exception}")
-            flash(f"Produto N.º{product["id"]} editado com sucesso")
+            flash(f"Produto N.º{product['id']} editado com sucesso")
             return redirect("/products")
         # A product_type_id is given
 
         elif request.form.get("product-type-id"):
             # Check if the product_type with given id exists
-            product_type = db.get_full_product_type_by_id(request.form.get("product-type-id"))
+            product_type = db.get_full_product_type_by_id(
+                request.form.get("product-type-id")
+            )
             if len(product_type) != 1:
                 return apology("Tipo de produto não encontrado")
             product_type = product_type[0]
             new_values = {
                 "name": request.form.get("type-name"),
-                "status": request.form.get("type-status")
+                "status": request.form.get("type-status"),
             }
             # Validate the new_values data
-            if (not new_values["name"]
-            or not new_values["status"] in ["active", "inactive"]):
+            if not new_values["name"] or not new_values["status"] in [
+                "active",
+                "inactive",
+            ]:
                 return apology("Algum dos valores enviados são incompatíveis")
             try:
-                db.update_product_type(new_values["name"], new_values["status"], product_type["id"])   
+                db.update_product_type(
+                    new_values["name"], new_values["status"], product_type["id"]
+                )
             except Exception as exception:
-                return apology(f"Não foi possível editar o tipo de produto\n{exception}")
-            flash(f"Tipo de produto N.º{product_type["id"]} editado com sucesso")
+                return apology(
+                    f"Não foi possível editar o tipo de produto\n{exception}"
+                )
+            flash(f"Tipo de produto N.º{product_type['id']} editado com sucesso")
             return redirect("/products")
 
     # User reached route via GET
@@ -303,16 +354,19 @@ def products_edit():
                 return apology("Produto não encontrado")
             product = product[0]
             product_types = db.get_active_product_types()
-            return render_template("edit-product.html",
-                                   product=product,
-                                   product_types=product_types)
+            return render_template(
+                "edit-product.html", product=product, product_types=product_types
+            )
         # Serve page for editing a product type
         elif request.args.get("product-type-id"):
-            product_type = db.get_full_product_type_by_id(request.args.get("product-type-id"))
+            product_type = db.get_full_product_type_by_id(
+                request.args.get("product-type-id")
+            )
             if len(product_type) != 1:
                 return apology("Tipo de produto não encontrado")
             product_type = product_type[0]
             return render_template("edit-product-type.html", product_type=product_type)
+
 
 @app.route("/products/new/product", methods=["GET", "POST"])
 @login_required
@@ -325,12 +379,16 @@ def products_new_product():
             "type": request.form.get("product-type"),
         }
         # Validate the new_values data
-        if (not new_values["name"]
-        or not new_values["price"].isnumeric() 
-        or len(db.get_product_type_by_id(new_values["type"])) != 1):
+        if (
+            not new_values["name"]
+            or not new_values["price"].isnumeric()
+            or len(db.get_product_type_by_id(new_values["type"])) != 1
+        ):
             return apology("Algum dos valores enviados são incompatíveis")
         try:
-            db.create_product(new_values["name"], new_values["price"], new_values["type"])
+            db.create_product(
+                new_values["name"], new_values["price"], new_values["type"]
+            )
         except Exception as exception:
             return apology(f"Não foi possível registar o produto: \n{exception}")
         flash(f"Produto registrado com sucesso")
@@ -339,6 +397,7 @@ def products_new_product():
     else:
         product_types = db.get_active_product_types()
         return render_template("new-product.html", product_types=product_types)
+
 
 @app.route("/products/new/product-type", methods=["GET", "POST"])
 @login_required
@@ -353,12 +412,15 @@ def products_new_product_type():
         try:
             db.create_product_type(type_name)
         except Exception as exception:
-            return apology(f"Não foi possível registar o tipo de produto: \n{exception}")
+            return apology(
+                f"Não foi possível registar o tipo de produto: \n{exception}"
+            )
         flash(f"Tipo de produto registrado com sucesso")
         return redirect("/products")
         # User reached route via get
     else:
         return render_template("new-product-type.html")
+
 
 @app.route("/new-order", methods=["GET", "POST"])
 @login_required
@@ -371,9 +433,12 @@ def new_order():
             for product in request.form:
                 if product.isnumeric() and request.form.get(product).isnumeric():
                     if int(request.form.get(product)) > 0:
-                        order_products.append({"id": int(product),
-                                               "quantity": int(request.form
-                                                               .get(product))})
+                        order_products.append(
+                            {
+                                "id": int(product),
+                                "quantity": int(request.form.get(product)),
+                            }
+                        )
         except:
             return apology("Não foi possível registrar o produto")
         customer = request.form.get("customer")
@@ -389,9 +454,14 @@ def new_order():
         product_types = db.get_product_types()
         products = []
         for type in product_types:
-            products.append({"type": type["type_name"],
-                             "products": db.get_products_by_type(type["id"])})
+            products.append(
+                {
+                    "type": type["type_name"],
+                    "products": db.get_products_by_type(type["id"]),
+                }
+            )
         return render_template("new-order.html", products=products)
+
 
 @app.route("/order-details")
 @login_required
@@ -408,13 +478,16 @@ def order_details():
     details["time"] = db.get_order_time(order_id)
     details["status"] = db.get_order_status(order_id)[0].get("order_status")
 
-
     increments = db.get_order_increments(order_id)
     for i in range(len(increments)):
-        increments[i]["products"] = db.get_increment_products(increments[i]["id"], order_id)
+        increments[i]["products"] = db.get_increment_products(
+            increments[i]["id"], order_id
+        )
         increments[i]["total"] = db.get_increment_total(increments[i]["id"])
-    return render_template("order-details.html", order=order,
-                           increments=increments, details=details)
+    return render_template(
+        "order-details.html", order=order, increments=increments, details=details
+    )
+
 
 @app.route("/reports")
 @login_required

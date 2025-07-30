@@ -28,7 +28,16 @@
             <table class="table table-bordered table-striped">
                 {% if order %}
                 <thead>
-                <tr class="table-{{ color }}"><th colspan="3">Pedido N.º{{ order.id }}</th></tr>
+                    <tr class="table-{{ color }}">
+                      <th colspan="3">Pedido N.º{{ order.id }}
+                          {% if order.table_number %}
+                          - Mesa {{ order.table_number }}
+                          {% endif %}
+                          {% if order.customer_name %}
+                          - {{ order.customer_name | capitalize }}
+                          {% endif %}
+                      </th>
+                    </tr>
                 </thead>
                 {% endif %}
             {% for type in products %}

@@ -31,6 +31,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    productSearch.addEventListener('click', function() {
+        this.value = '';
+        this.dispatchEvent(new Event('input'));
+    });
+
     // Add product to order
     productCatalogBody.addEventListener('click', function(e) {
         if (e.target.classList.contains('add-product-btn')) {
@@ -67,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <input type="number" class="form-control form-control-sm quantity-input" value="${item.quantity}" min="1" data-id="${id}" style="width: 60px;">
                 </td>
                 <td>
-                    <button class="btn btn-sm btn-danger remove-item-btn" data-id="${id}">&times;</button>
+                    <button type="button" class="btn btn-sm btn-danger remove-item-btn" data-id="${id}">&times;</button>
                 </td>
             `;
             currentOrderBody.appendChild(row);

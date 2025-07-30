@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${item.name}</td>
-                <td>${item.price.toFixed(2)}</td>
+                <td>${formatBRL(item.price)}</td>
                 <td>
-                    <input type="number" class="form-control form-control-sm quantity-input" value="${item.quantity}" min="1" data-id="${id}" style="width: 60px;">
+                    <input type="number" class="form-control form-control-sm quantity-input mx-auto" value="${item.quantity}" min="1" data-id="${id}" style="width: 60px;">
                 </td>
                 <td>
                     <button type="button" class="btn btn-sm btn-danger remove-item-btn" data-id="${id}">&times;</button>
@@ -79,7 +79,8 @@ document.addEventListener('DOMContentLoaded', function() {
             totalPrice += item.price * item.quantity;
         }
 
-        totalPriceEl.textContent = totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    //totalPriceEl.textContent = totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    totalPriceEl.textContent = formatBRL(totalPrice);
     }
 
     // Update quantity or remove item

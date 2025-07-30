@@ -13,20 +13,25 @@
                 {% if edit_customer_info %}
                     <table class="table">
                         <thead>
-                          <th>Nº da mesa</th>
-                          <th>Nome do cliente</th>
-                        <tr>
-                              <td>
-                                  <div class="mx-auto" style="max-width: 8rem;">
-                                      <input class="form-control" name="table-number" {% if order %}value="{{ order.table_number }}"{% endif %} type="number" style="max-width: 8rem;">
-                                  </div>
-                              </td>
-                              <td>
-                                  <div class="mx-auto" style="max-width: 8rem;">
-                                      <input class="form-control" name="customer" {% if order %}value="{{ order.customer_name }}"{% endif %} type="text" style="max-width: 8rem;">
-                                  </div>
-                              </td>
-                        </tr>
+                            <tr>
+                                <th>Nº da mesa</th>
+                                <th>Nome do cliente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="mx-auto" style="max-width: 8rem;">
+                                        <input class="form-control" name="table-number" {% if order %}value="{{ order.table_number }}"{% endif %} type="number" style="max-width: 8rem;">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="mx-auto" style="max-width: 8rem;">
+                                        <input class="form-control" name="customer" {% if order %}value="{{ order.customer_name }}"{% endif %} type="text" style="max-width: 8rem;">
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
                 {% endif %}
                 <div class="py-1 my-1">

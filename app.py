@@ -99,13 +99,14 @@ def edit_order():
 
 @app.route("/modify-order-status", methods=["POST"])
 @login_required
-def delete_order():
-    order_id = request.form.get("order-id")
+def modify_order_status(order_id=None, action=None):
+    if (order_id is None) or (action is None):
+        order_id = request.form.get("order-id")
+        action = request.form.get("action")
     order = db.get_order_status(order_id)
     if len(order) != 1:
         return apology("Não foi possível encontrar o pedido")
     order = order[0]
-    action = request.form.get("action")
     if action == "delete":
         db.delete_order_products(order_id)
         db.delete_order_increments(order_id)
@@ -115,9 +116,9 @@ def delete_order():
     if action == "complete":
         try:
             db.update_order_status(order_id, "completed")
-            flash(f"Pedido N.º {order_id} completado com sucesso")
         except:
             return apology("Algo deu errado com a mudança do status do pedido")
+        flash(f"Pedido N.º {order_id} completado com sucesso")
         return redirect("/")
     if action == "reopen":
         try:
@@ -299,7 +300,7 @@ def products_edit():
                 not new_values["name"]
                 or not new_values["price"].isnumeric()
                 or len(db.get_product_type_by_id(new_values["type"])) != 1
-                or not new_values["status"] in ["active", "inactive"]
+                or new_values["status"] not in ["active", "inactive"]
             ):
                 return apology("Algum dos valores enviados são incompatíveis")
             try:
@@ -329,7 +330,7 @@ def products_edit():
                 "status": request.form.get("type-status"),
             }
             # Validate the new_values data
-            if not new_values["name"] or not new_values["status"] in [
+            if not new_values["name"] or new_values["status"] not in [
                 "active",
                 "inactive",
             ]:
@@ -391,7 +392,7 @@ def products_new_product():
             )
         except Exception as exception:
             return apology(f"Não foi possível registar o produto: \n{exception}")
-        flash(f"Produto registrado com sucesso")
+        flash("Produto registrado com sucesso")
         return redirect("/products")
     # User reached route via get
     else:
@@ -415,7 +416,7 @@ def products_new_product_type():
             return apology(
                 f"Não foi possível registar o tipo de produto: \n{exception}"
             )
-        flash(f"Tipo de produto registrado com sucesso")
+        flash("Tipo de produto registrado com sucesso")
         return redirect("/products")
         # User reached route via get
     else:
@@ -447,6 +448,8 @@ def new_order():
         # Register the order into the orders table
         order_id = db.create_order(session["user_id"], customer, table_number)
         db.add_order_products(order_id, order_products)
+        if request.form.get("auto-complete") == 'True':
+            return modify_order_status(order_id=order_id, action="complete")           
         flash(f"Pedido N.º{order_id} registrado")
         return redirect("/")
     # User reached route via GET

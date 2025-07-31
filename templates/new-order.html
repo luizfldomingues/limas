@@ -7,9 +7,10 @@ Novo Pedido
 {% block script %}
 <script src="/static/js/helpers.js"></script>
 <script src="/static/js/order.js"></script>
+<script src="/static/js/new-order.js"></script>
 {% endblock %}
 
 {% block main %}
 {% from "macros.html" import edit_order %}
-{{edit_order("/new-order", products, True)}}
+{{ edit_order(action="/new-order", products=products, edit_customer_info=True) }}
 {% endblock %}

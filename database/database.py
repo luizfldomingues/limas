@@ -314,4 +314,40 @@ class Database:
         )
         return row['total'] if row and row['total'] is not None else 0
 
+    def get_daily_sales(self, date):
+        """Calculates the total sales for a specific day."""
+        row = self._execute_query(
+            "SELECT SUM(amount) AS total FROM order_payments WHERE DATE(payment_time, '-3 hours') = ?",
+            (date,),
+            fetchone=True
+        )
+        return row['total'] if row and row['total'] is not None else 0
+
+    def get_weekly_sales(self, year, week):
+        """Calculates the total sales for a specific week."""
+        row = self._execute_query(
+            "SELECT SUM(amount) AS total FROM order_payments WHERE STRFTIME('%Y-%W', payment_time, '-3 hours') = ?",
+            (f"{year}-{week}",),
+            fetchone=True
+        )
+        return row['total'] if row and row['total'] is not None else 0
+
+    def get_monthly_sales(self, year, month):
+        """Calculates the total sales for a specific month."""
+        row = self._execute_query(
+            "SELECT SUM(amount) AS total FROM order_payments WHERE STRFTIME('%Y-%m', payment_time, '-3 hours') = ?",
+            (f"{year}-{month}",),
+            fetchone=True
+        )
+        return row['total'] if row and row['total'] is not None else 0
+
+    def get_yearly_sales(self, year):
+        """Calculates the total sales for a specific year."""
+        row = self._execute_query(
+            "SELECT SUM(amount) AS total FROM order_payments WHERE STRFTIME('%Y', payment_time, '-3 hours') = ?",
+            (year,),
+            fetchone=True
+        )
+        return row['total'] if row and row['total'] is not None else 0
+
 db = Database("/home/luizdomingues/Desktop/cs50x-final-project-limas/database/limas.db")

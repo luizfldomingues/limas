@@ -526,12 +526,48 @@ def order_details():
         "order-details.html", order=order, increments=increments, details=details
     )
 
-@app.route("/reports")
+@app.route("/reports", methods=["GET", "POST"])
 @login_required
 def reports():
     """Page for querying for sales reports"""
-    flash("TODO")
-    return render_template("blank.html")
+    if request.method == "POST":
+        report_type = request.form.get("report_type")
+        total_sales = 0
+        period = ""
+
+        if report_type == "daily":
+            date = request.form.get("date")
+            if not date:
+                return apology("Data inválida")
+            total_sales = db.get_daily_sales(date)
+            period = date
+        elif report_type == "weekly":
+            week_input = request.form.get("week")
+            if not week_input:
+                return apology("Semana inválida")
+            year, week = week_input.split("-W")
+            total_sales = db.get_weekly_sales(year, week)
+            period = f"Semana {week} de {year}"
+        elif report_type == "monthly":
+            month_input = request.form.get("month")
+            if not month_input:
+                return apology("Mês inválido")
+            year, month = month_input.split("-")
+            total_sales = db.get_monthly_sales(year, month)
+            period = f"Mês {month} de {year}"
+        elif report_type == "yearly":
+            year = request.form.get("year")
+            if not year or not year.isdigit():
+                return apology("Ano inválido")
+            total_sales = db.get_yearly_sales(year)
+            period = f"Ano de {year}"
+        else:
+            return apology("Tipo de relatório inválido")
+
+        return render_template("report_result.html", period=period, total_sales=brl(total_sales))
+
+    else:
+        return render_template("reports.html")
 
 
 @app.route("/point-of-sale", methods=["GET", "POST"])

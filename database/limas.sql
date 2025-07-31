@@ -50,4 +50,13 @@ CREATE TABLE order_products (
     FOREIGN KEY (order_increment_id) REFERENCES order_increments(id)
 );
 
+CREATE TABLE order_payments (
+  id INTEGER PRIMARY KEY NOT NULL,
+  order_id INTEGER NOT NULL,
+  payment_method TEXT CHECK (payment_method IN (NULL, 'cash', 'credit_card', 'debit_card', 'pix')),
+  amount INTEGER NOT NULL,
+  payment_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+
 --TODO: Add indexes on tables

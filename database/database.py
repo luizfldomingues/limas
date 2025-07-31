@@ -114,6 +114,13 @@ class Database:
         """Updates the status of a specific order (e.g., 'pending', 'completed')."""
         self._execute_query("UPDATE orders SET order_status = ? WHERE id = ?", (status, order_id))
 
+    def add_payment(self, order_id, payment_method, amount):
+        """Adds a new payment record for a specific order."""
+        self._execute_query(
+            "INSERT INTO order_payments (order_id, payment_method, amount) VALUES (?, ?, ?)",
+            (order_id, payment_method, amount)
+        )
+
     def get_date_since(self, date_range):
         """Calculates a date based on a given range of days from the current timestamp."""
         row = self._execute_query("SELECT DATE(DATETIME(current_timestamp, '-3 hours'), '-' || ? || ' days') AS date", (date_range,), fetchone=True)

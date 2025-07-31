@@ -97,6 +97,44 @@ def edit_order():
         )
 
 
+@app.route("/checkout", methods=["GET", "POST"])
+@login_required
+def checkout():
+    if request.method == "POST":
+        order_id = request.form.get("order-id")
+        payment_method = request.form.get("payment-method")
+        if not payment_method:
+            payment_method = None
+        order = db.get_order(order_id)
+        if len(order) != 1:
+            return apology("Pedido não encontrado")
+        order_products = db.list_products(order)
+        total = order[0]["total"]
+        db.add_payment(order_id, payment_method, total)
+        db.update_order_status(order_id, "completed")
+        flash(f"Pedido N.º {order_id} completado com sucesso")
+        return redirect("/")
+    else:
+        order_id = request.args.get("order-id")
+        order = db.get_order(order_id)
+        if len(order) != 1:
+            return apology("Pedido não encontrado")
+        order_products = db.list_products(order)
+        total = order[0].get("total", 0)
+
+        if total == 0:
+            db.add_payment(order_id, None, 0)
+            db.update_order_status(order_id, "completed")
+            flash(f"Pedido N.º {order_id} (vazio) completado com sucesso")
+            return redirect("/")
+
+        return render_template(
+            "checkout.html",
+            order=order[0],
+            order_products=order_products,
+        )
+
+
 @app.route("/modify-order-status", methods=["POST"])
 @login_required
 def modify_order_status(order_id=None, action=None):
@@ -114,12 +152,7 @@ def modify_order_status(order_id=None, action=None):
         flash(f"Pedido Nº.{order_id} apagado com sucesso")
         return redirect("/")
     if action == "complete":
-        try:
-            db.update_order_status(order_id, "completed")
-        except:
-            return apology("Algo deu errado com a mudança do status do pedido")
-        flash(f"Pedido N.º {order_id} completado com sucesso")
-        return redirect("/")
+        return redirect(f"/checkout?order-id={order_id}")
     if action == "reopen":
         try:
             db.update_order_status(order_id, "pending")

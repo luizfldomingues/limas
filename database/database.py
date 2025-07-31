@@ -284,4 +284,34 @@ class Database:
         row = self._execute_query("SELECT id FROM users WHERE username = ?", (username,), fetchone=True)
         return row['id'] if row else None
 
+    def get_pos_status(self):
+        """Checks if the POS is open or closed."""
+        row = self._execute_query("SELECT id FROM pos_cash_movimentations LIMIT 1", fetchone=True)
+        return "open" if row else "closed"
+
+    def get_pos_cash_movimentations(self):
+        """Retrieves all cash movimentations from the POS."""
+        rows = self._execute_query("SELECT * FROM pos_cash_movimentations ORDER BY movimentation_time ASC")
+        return [dict(row) for row in rows]
+
+    def add_pos_cash_movimentation(self, user_id, quantity):
+        """Adds a cash movimentation to the POS."""
+        self._execute_query(
+            "INSERT INTO pos_cash_movimentations (user_id, quantity) VALUES (?, ?)",
+            (user_id, quantity)
+        )
+
+    def delete_pos_cash_movimentations(self):
+        """Deletes all cash movimentations from the POS."""
+        self._execute_query("DELETE FROM pos_cash_movimentations")
+
+    def get_cash_sales(self, since_time):
+        """Calculates the total of cash sales since a given time."""
+        row = self._execute_query(
+            "SELECT SUM(amount) AS total FROM order_payments WHERE payment_method = 'cash' AND payment_time >= ?",
+            (since_time,),
+            fetchone=True
+        )
+        return row['total'] if row and row['total'] is not None else 0
+
 db = Database("/home/luizdomingues/Desktop/cs50x-final-project-limas/database/limas.db")

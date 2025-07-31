@@ -60,4 +60,11 @@ CREATE TABLE order_payments (
   FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
+CREATE TABLE pos_cash_movimentations (
+  id INTEGER PRIMARY KEY NOT NULL,
+  user_id INTEGER NOT NULL,  quantity INTEGER NOT NULL,
+  movimentation_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 --TODO: Add indexes on tables

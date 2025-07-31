@@ -526,18 +526,83 @@ def order_details():
         "order-details.html", order=order, increments=increments, details=details
     )
 
-@app.route("/point-of-sale")
-@login_required
-def point_of_sale():
-    """ Page for managing the point of sale """
-    flash("TODO")
-    return render_template("blank.html")
 @app.route("/reports")
 @login_required
 def reports():
     """Page for querying for sales reports"""
     flash("TODO")
     return render_template("blank.html")
+
+
+@app.route("/point-of-sale", methods=["GET", "POST"])
+@login_required
+def point_of_sale():
+    if request.method == "POST":
+        movimentation_type = request.form.get("movimentation_type")
+        if movimentation_type == "close":
+            db.delete_pos_cash_movimentations()
+            flash("Caixa fechado com sucesso")
+            return redirect("/point-of-sale")
+        
+        quantity = request.form.get("quantity")
+        if not quantity or not quantity.isnumeric() or float(quantity) <= 0:
+            return apology("Valor inválido")
+        
+        quantity = int(float(quantity) * 100)
+
+        if movimentation_type == "withdraw":
+            quantity *= -1
+        
+        if movimentation_type in ["insert", "withdraw"]:
+            db.add_pos_cash_movimentation(session["user_id"], quantity)
+            if movimentation_type == 'insert':
+                flash("Valor inserido com sucesso")
+            else:
+                flash("Valor retirado com sucesso")
+            return redirect("/point-of-sale")
+        else:
+            return apology("Tipo de movimentação inválido")
+
+    else:
+        pos_status = db.get_pos_status()
+        if pos_status == "closed":
+            return render_template("caixa.html", pos_status="closed")
+        else:
+            movimentations = db.get_pos_cash_movimentations()
+            initial_balance = movimentations[0]["quantity"]
+            cash_sales = db.get_cash_sales(movimentations[0]["movimentation_time"])
+            withdrawals = 0
+            inserts = 0
+            for mov in movimentations[1:]:
+                if mov["quantity"] < 0:
+                    withdrawals += mov["quantity"]
+                else:
+                    inserts += mov["quantity"]
+            
+            current_balance = initial_balance + cash_sales + inserts + withdrawals
+
+            return render_template("caixa.html", pos_status="open", 
+                                   initial_balance=brl(initial_balance),
+                                   cash_sales=brl(cash_sales),
+                                   withdrawals=brl(withdrawals * -1),
+                                   inserts=brl(inserts),
+                                   current_balance=brl(current_balance))
+
+
+@app.route("/caixa/open", methods=["GET", "POST"])
+@login_required
+def open_pos():
+    if request.method == "POST":
+        quantity = request.form.get("quantity")
+        if not quantity or not quantity.isnumeric() or float(quantity) < 0:
+            return apology("Valor inválido")
+        
+        quantity = int(float(quantity) * 100)
+        db.add_pos_cash_movimentation(session["user_id"], quantity)
+        flash("Caixa aberto com sucesso")
+        return redirect("/point-of-sale")
+    else:
+        return render_template("open_pos.html")
 
 
 @app.route("/register", methods=["GET", "POST"])

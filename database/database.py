@@ -42,13 +42,13 @@ class Database:
             conn.commit()
             return result
 
-    def add_order_products(self, order_id, increment_products):
+    def add_order_products(self, order_id, increment_products, observation):
         """Adds new products to an existing order, creating an order increment."""
         if not increment_products:
             return
         order_increment_id = self._execute_query(
-            "INSERT INTO order_increments (order_id, user_id) VALUES (?, ?)",
-            (order_id, session["user_id"]),
+            "INSERT INTO order_increments (order_id, user_id, observation) VALUES (?, ?, ?)",
+            (order_id, session["user_id"], observation),
             lastrowid=True
         )
         for product in increment_products:
@@ -252,7 +252,7 @@ class Database:
     def get_order_increments(self, order_id):
         """Retrieves all increments for a specific order."""
         rows = self._execute_query(
-            "SELECT oi.id AS id, u.username, DATETIME(oi.increment_time, '-3 hours') AS increment_time "
+            "SELECT oi.id AS id, u.username, oi.observation, DATETIME(oi.increment_time, '-3 hours') AS increment_time "
             "FROM order_increments oi JOIN users u ON oi.user_id = u.id WHERE oi.order_id = ? "
             "ORDER BY oi.increment_time DESC",
             (order_id,)

@@ -33,6 +33,7 @@ CREATE TABLE order_increments (
     id INTEGER PRIMARY KEY NOT NULL,
     order_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
+    observation TEXT,
     increment_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id),
     FOREIGN KEY (user_id) REFERENCES users(id)

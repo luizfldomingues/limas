@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>${item.name}</td>
                 <td>${formatBRL(item.price)}</td>
                 <td>
-                    <input type="number" class="form-control form-control-sm quantity-input mx-auto" value="${item.quantity}" min="1" data-id="${id}" style="width: 60px;">
+                    <input type="number" class="form-control form-control-sm quantity-input mx-auto" value="${item.quantity}" min="1" name="${id}" data-id="${id}" style="width: 60px;">
                 </td>
                 <td>
                     <button type="button" class="btn btn-sm btn-danger remove-item-btn" data-id="${id}">&times;</button>

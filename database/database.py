@@ -254,7 +254,7 @@ class Database:
         rows = self._execute_query(
             "SELECT oi.id AS id, u.username, oi.observation, DATETIME(oi.increment_time, '-3 hours') AS increment_time "
             "FROM order_increments oi JOIN users u ON oi.user_id = u.id WHERE oi.order_id = ? "
-            "ORDER BY oi.increment_time DESC",
+            "ORDER BY oi.increment_time ASC",
             (order_id,)
         )
         return [dict(row) for row in rows]

@@ -79,8 +79,9 @@ def edit_order():
                     increment_products.append(
                         {"id": actual_product["id"], "quantity": quantity}
                     )
+        observation = request.form.get("observation")
         db.update_order(order_id, customer, table)
-        db.add_order_products(order_id, increment_products)
+        db.add_order_products(order_id, increment_products, observation)
         flash(f"Pedido Nº.{order_id} editado com sucesso")
         return redirect("/")
     # User reached route via GET
@@ -214,7 +215,8 @@ def increment_order():
         except:
             return apology("Não foi possível registrar o produto")
 
-        db.add_order_products(order_id, increment_products)
+        observation = request.form.get("observation")
+        db.add_order_products(order_id, increment_products, observation)
         flash(f"Pedido Nº.{order_id} incrementado com sucesso")
         return redirect("/")
 
@@ -476,10 +478,11 @@ def new_order():
             return apology("Não foi possível registrar o produto")
         customer = request.form.get("customer")
         table_number = request.form.get("table-number")
+        observation = request.form.get("observation")
 
         # Register the order into the orders table
         order_id = db.create_order(session["user_id"], customer, table_number)
-        db.add_order_products(order_id, order_products)
+        db.add_order_products(order_id, order_products, observation)
         if request.form.get("auto-complete") == 'True':
             return modify_order_status(order_id=order_id, action="complete")           
         flash(f"Pedido N.º{order_id} registrado")

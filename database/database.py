@@ -316,11 +316,13 @@ class Database:
 
     def get_daily_sales(self, date):
         """Calculates the total sales for a specific day."""
-        row = self._execute_query(
-            "SELECT SUM(amount) AS total FROM order_payments WHERE DATE(payment_time, '-3 hours') = ?",
-            (date,),
-            fetchone=True
-        )
+        sales = {}
+        for payment_method in ('cash', 'credit_card', 'debit_card', 'pix'):
+            rows = self._execute_query(
+                "SELECT SUM(amount) FROM order_payments WHERE DATE(payment_time, '-3 hours') = ? AND payment_method = ? GROUP BY DATE(payment_time, '-3 hours')",
+                (date, payment_method),
+            )
+            sales[payment_method] = [dict(row) for row in rows]
         return row['total'] if row and row['total'] is not None else 0
 
     def get_weekly_sales(self, year, week):

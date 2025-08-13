@@ -1,0 +1,131 @@
+-- Tipos de produtos
+INSERT INTO product_types (id, type_name, type_status) VALUES
+(1, 'Bebidas Quentes', 'active'),
+(2, 'Bebidas Frias', 'active'),
+(3, 'Lanches', 'active'),
+(4, 'Sobremesas', 'active'),
+(5, 'Pratos Principais', 'active'),
+(6, 'Saladas', 'active'),
+(7, 'Sanduíches', 'active'),
+(8, 'Café da Manhã', 'active');
+
+-- Produtos
+INSERT INTO products (id, product_name, product_type_id, price, product_status) VALUES
+-- Bebidas Quentes
+(1, 'Café Expresso', 1, 800, 'active'),
+(2, 'Cappuccino', 1, 1200, 'active'),
+(3, 'Latte', 1, 1400, 'active'),
+(4, 'Café Americano', 1, 1000, 'active'),
+(5, 'Chocolate Quente', 1, 1300, 'active'),
+(6, 'Mocha', 1, 1500, 'active'),
+(7, 'Chai Latte', 1, 1400, 'active'),
+(8, 'Matcha Latte', 1, 1600, 'active'),
+(9, 'Flat White', 1, 1300, 'active'),
+(10, 'Chá de Ervas', 1, 900, 'active'),
+
+-- Bebidas Frias
+(11, 'Café Gelado', 2, 1200, 'active'),
+(12, 'Latte Gelado', 2, 1400, 'active'),
+(13, 'Mocha Gelado', 2, 1500, 'active'),
+(14, 'Chá Gelado de Limão', 2, 1000, 'active'),
+(15, 'Chá Gelado de Pêssego', 2, 1000, 'active'),
+(16, 'Suco Natural de Laranja', 2, 1100, 'active'),
+(17, 'Suco Natural de Limão', 2, 1000, 'active'),
+(18, 'Água com Gás', 2, 600, 'active'),
+(19, 'Coca-Cola', 2, 800, 'active'),
+(20, 'Sprite', 2, 800, 'active'),
+(21, 'Vitamina de Morango e Banana', 2, 1600, 'active'),
+(22, 'Vitamina de Manga e Abacaxi', 2, 1600, 'active'),
+(23, 'Milkshake de Chocolate', 2, 1500, 'active'),
+(24, 'Milkshake de Baunilha', 2, 1500, 'active'),
+
+-- Lanches
+(25, 'Batata Frita', 3, 1000, 'active'),
+(26, 'Batata Frita com Queijo', 3, 1200, 'active'),
+(27, 'Anéis de Cebola', 3, 1100, 'active'),
+(28, 'Pão de Alho', 3, 900, 'active'),
+(29, 'Palitos de Mussarela', 3, 1300, 'active'),
+(30, 'Nachos', 3, 1400, 'active'),
+(31, 'Pipoca', 3, 700, 'active'),
+(32, 'Pretzel', 3, 800, 'active'),
+(33, 'Rolinhos Primavera', 3, 1200, 'active'),
+(34, 'Mini Tacos', 3, 1300, 'active'),
+
+-- Sobremesas
+(35, 'Bolo de Chocolate', 4, 1500, 'active'),
+(36, 'Cheesecake', 4, 1500, 'active'),
+(37, 'Brownie', 4, 1000, 'active'),
+(38, 'Sorvete de Baunilha', 4, 900, 'active'),
+(39, 'Sorvete de Chocolate', 4, 900, 'active'),
+(40, 'Waffle', 4, 1200, 'active'),
+(41, 'Panquecas', 4, 1300, 'active'),
+(42, 'Salada de Frutas', 4, 1100, 'active'),
+(43, 'Tiramisu', 4, 1400, 'active'),
+(44, 'Rosquinha', 4, 800, 'active'),
+
+-- Pratos Principais
+(45, 'Frango Grelhado', 5, 2500, 'active'),
+(46, 'Bife com Batata Frita', 5, 3500, 'active'),
+(47, 'Peixe com Batata Frita', 5, 2800, 'active'),
+(48, 'Espaguete à Bolonhesa', 5, 2400, 'active'),
+(49, 'Refogado de Legumes', 5, 2200, 'active'),
+(50, 'Hambúrguer de Carne', 5, 2000, 'active'),
+(51, 'Hambúrguer de Frango', 5, 2000, 'active'),
+(52, 'Hambúrguer Vegano', 5, 2200, 'active'),
+(53, 'Costela ao Barbecue', 5, 3800, 'active'),
+(54, 'Costeletas de Cordeiro', 5, 4000, 'active'),
+
+-- Saladas
+(55, 'Salada Caesar', 6, 1800, 'active'),
+(56, 'Salada Grega', 6, 1700, 'active'),
+(57, 'Salada Cobb', 6, 1900, 'active'),
+(58, 'Salada Verde', 6, 1500, 'active'),
+(59, 'Salada de Quinoa', 6, 2000, 'active'),
+(60, 'Salada de Frango', 6, 1900, 'active'),
+
+-- Sanduíches
+(61, 'Sanduíche Club', 7, 1800, 'active'),
+(62, 'Sanduíche BLT', 7, 1700, 'active'),
+(63, 'Sanduíche de Presunto e Queijo', 7, 1500, 'active'),
+(64, 'Sanduíche de Peru', 7, 1600, 'active'),
+(65, 'Sanduíche Vegetariano', 7, 1500, 'active'),
+(66, 'Queijo Quente', 7, 1400, 'active'),
+(67, 'Sanduíche de Atum', 7, 1600, 'active'),
+(68, 'Wrap de Frango', 7, 1700, 'active'),
+(69, 'Wrap de Falafel', 7, 1600, 'active'),
+(70, 'Wrap de Carne', 7, 1800, 'active'),
+
+-- Café da Manhã
+(71, 'Ovos Mexidos', 8, 1200, 'active'),
+(72, 'Omelete', 8, 1400, 'active'),
+(73, 'Torrada com Abacate', 8, 1500, 'active'),
+(74, 'Mingau', 8, 1100, 'active'),
+(75, 'Rabanada', 8, 1400, 'active'),
+(76, 'Bagel com Cream Cheese', 8, 1000, 'active'),
+(77, 'Croissant', 8, 900, 'active'),
+(78, 'Burrito de Café da Manhã', 8, 1600, 'active'),
+(79, 'Muffin de Ovo', 8, 1200, 'active'),
+(80, 'Iogurte com Granola', 8, 1300, 'active'),
+
+-- Itens Extras
+(81, 'Café Expresso Duplo', 1, 1000, 'active'),
+(82, 'Latte de Caramelo', 1, 1500, 'active'),
+(83, 'Macchiato Gelado de Caramelo', 2, 1600, 'active'),
+(84, 'Energético', 2, 1200, 'active'),
+(85, 'Batata Doce Frita', 3, 1200, 'active'),
+(86, 'Sorvete de Morango', 4, 900, 'active'),
+(87, 'Salmão Grelhado', 5, 3400, 'active'),
+(88, 'Macarrão com Camarão', 5, 3200, 'active'),
+(89, 'Salada de Macarrão Oriental', 6, 1800, 'active'),
+(90, 'Panini Italiano', 7, 1700, 'active'),
+(91, 'Sanduíche de Café da Manhã', 8, 1500, 'active'),
+(92, 'Água de Coco', 2, 900, 'active'),
+(93, 'Vitamina de Banana', 2, 1500, 'active'),
+(94, 'Jalapeños Recheados', 3, 1300, 'active'),
+(95, 'Cupcake', 4, 800, 'active'),
+(96, 'Tacos de Carne', 5, 2200, 'active'),
+(97, 'Pizza Vegetariana', 5, 2400, 'active'),
+(98, 'Macarrão Alfredo', 5, 2600, 'active'),
+(99, 'Salada de Abacate', 6, 1900, 'active'),
+(100, 'Bagel com Salmão Defumado', 8, 1700, 'active');
+

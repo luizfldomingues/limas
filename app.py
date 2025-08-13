@@ -488,15 +488,6 @@ def order_details():
         "order-details.html", order=order, increments=increments, details=details
     )
 
-
-@app.route("/reports")
-@login_required
-def reports():
-    """Page for querying for sales reports"""
-    flash("TODO")
-    return render_template("blank.html")
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register new users"""

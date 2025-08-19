@@ -321,15 +321,16 @@ def products_edit():
             product_type = db.get_full_product_type_by_id(
                 request.form.get("product-type-id")
             )
-            if len(product_type) != 1:
+            if len(product_type) != 1: # type: ignore
+
                 return apology("Tipo de produto não encontrado")
-            product_type = product_type[0]
+            product_type = product_type[0] # type: ignore
             new_values = {
                 "name": request.form.get("type-name"),
                 "status": request.form.get("type-status"),
             }
             # Validate the new_values data
-            if not new_values["name"] or not new_values["status"] in [
+            if not new_values["name"] or new_values["status"] not in [
                 "active",
                 "inactive",
             ]:
@@ -350,9 +351,9 @@ def products_edit():
         # Serve page for editing a product
         if request.args.get("product-id"):
             product = db.get_product_by_id(request.args.get("product-id"))
-            if len(product) != 1:
+            if len(product) != 1: # type: ignore
                 return apology("Produto não encontrado")
-            product = product[0]
+            product = product[0] # type: ignore
             product_types = db.get_active_product_types()
             return render_template(
                 "edit-product.html", product=product, product_types=product_types
@@ -362,9 +363,9 @@ def products_edit():
             product_type = db.get_full_product_type_by_id(
                 request.args.get("product-type-id")
             )
-            if len(product_type) != 1:
+            if len(product_type) != 1: # type: ignore
                 return apology("Tipo de produto não encontrado")
-            product_type = product_type[0]
+            product_type = product_type[0] # type: ignore
             return render_template("edit-product-type.html", product_type=product_type)
 
 

@@ -430,36 +430,33 @@ def new_order():
         order_products = []
         # Append each ordered product to the order_products list
         try:
-            for product in request.form:
-                if product.isnumeric() and request.form.get(product).isnumeric():
-                    if int(request.form.get(product)) > 0:
+            for product_id, quantity in request.form.items():
+                if product_id.isnumeric() and quantity.isnumeric():
+                    if int(quantity) > 0:
                         order_products.append(
                             {
-                                "id": int(product),
-                                "quantity": int(request.form.get(product)),
+                                "id": int(product_id),
+                                "quantity": int(quantity),
                             }
                         )
-        except:
-            return apology("Não foi possível registrar o produto")
+        except Exception as e:
+            return apology(f"{e}")
         customer = request.form.get("customer")
         table_number = request.form.get("table-number")
 
         # Register the order into the orders table
-        order_id = db.create_order(session["user_id"], customer, table_number)
-        db.add_order_products(order_id, order_products)
+        order_id = db.create_order(user_id=session["user_id"],
+                                   customer_name=customer, 
+                                   table_number=table_number)
+        db.add_order_products(order_id=order_id, increment_products=order_products)
         flash(f"Pedido N.º{order_id} registrado")
         return redirect("/")
     # User reached route via GET
     else:
         product_types = db.get_product_types()
-        products = []
-        for type in product_types:
-            products.append(
-                {
-                    "type": type["type_name"],
-                    "products": db.get_products_by_type(type["id"]),
-                }
-            )
+        products = [{"type": type["type_name"],
+                     "products": db.get_products_by_type(type["id"])}
+                      for type in product_types] # type: ignore
         return render_template("new-order.html", products=products)
 
 

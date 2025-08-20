@@ -48,52 +48,50 @@ def edit_order():
         order_id = request.form.get("order-id")
         customer = request.form.get("customer")
         table = request.form.get("table-number")
+
         # Check if the table number is valid
         if table:
             if not table.isnumeric():
                 return apology("Número de mesa inválido")
         increment_products = []
-        intended_products = {}
+
         # Request the order from the database
         order = db.get_order(order_id)
-        if len(order) != 1:
+        if len(order) != 1: # type: ignore
             return apology("Não foi possível encontrar o pedido")
+
         # Request the list of the actual products
-        actual_products = db.list_products(order)[int(order_id)]
-        # Populates the intended products list
+        actual_products = db.list_products(order)[int(order_id)] # type: ignore
+        
+        # Calculate the difference between what the user want and what the order already has
         for actual_product in actual_products:
-            if request.form.get(str(actual_product["id"])):
-                if request.form.get(str(actual_product["id"])).isnumeric():
-                    intended_products[actual_product["id"]] = int(
-                        request.form.get(str((actual_product["id"])))
-                    )
-                else:
-                    intended_products[actual_product["id"]] = 0
-        # Populates the increment_products list
-        for actual_product in actual_products:
-            if type(intended_products.get(actual_product["id"])) != None:
-                quantity = intended_products[actual_product["id"]] - int(
-                    actual_product["quantity"]
+            try:
+                quantity = int(request.form.get(str(actual_product["id"]))) - (actual_product["quantity"])  # type: ignore
+            except ValueError:
+                quantity = -actual_product["quantity"]
+            except (IndexError, KeyError):
+                return(apology("Não foi possível processar a edição"))
+            if quantity != 0:
+                increment_products.append(
+                    {"quantity": quantity,
+                    "id": actual_product["id"]}
                 )
-                if quantity != 0:
-                    increment_products.append(
-                        {"id": actual_product["id"], "quantity": quantity}
-                    )
         db.update_order(order_id, customer, table)
         db.add_order_products(order_id, increment_products)
         flash(f"Pedido Nº.{order_id} editado com sucesso")
         return redirect("/")
-    # User reached route via GET
-    else:
+
+
+    else: # GET
         order_id = request.args.get("order-id")
         order = db.get_order(order_id)
-        if len(order) != 1:
+        if len(order) != 1: # type: ignore
             return apology("Pedido não encontrado")
         order_products = db.list_products(order)
         return render_template(
             "edit-order.html",
-            order=order[0],
-            order_products=order_products[int(order_id)],
+            order=order[0], # type: ignore
+            order_products=order_products[int(order_id)], # type: ignore
         )
 
 

@@ -40,6 +40,8 @@ class Database:
             conn.close()
 
     def _fetchall_query(self, query, params=(), fetch_limit=0):
+        """Execute a query and return a list of dicts with all the results
+        if fetch_limit is not zero, return at maximum fetch_limit"""
         cur = self._get_db_connection().execute(query, params)
         if fetch_limit:
             rows = cur.fetchmany(fetch_limit)
@@ -48,9 +50,14 @@ class Database:
         return [dict(row) for row in rows]
 
     def _fetchone_query(self, query, params=()):
-        return dict(self._get_db_connection().execute(query, params).fetchone())
+        """Execute a query and return a dict with the gotten row.
+        if no row is found, return None"""
+        row = self._get_db_connection().execute(query, params).fetchone()
+        if row:
+            return dict(row)
 
     def _execute_query(self, query, params=()):
+        """Execute a query, return cursor.lastrowid"""
         return self._get_db_connection().execute(query, params).lastrowid
 
     def _executemany_query(self, query, l_params):

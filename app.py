@@ -61,16 +61,16 @@ def edit_order():
 
         # Request the order from the database
         order = db.get_order(order_id)
-        if len(order) != 1: # type: ignore
+        if len(order) != 1:
             return apology("Não foi possível encontrar o pedido")
 
         # Request the list of the actual products
-        actual_products = db.list_products(order)[int(order_id)] # type: ignore
+        actual_products = db.list_products(order)[int(order_id)]
 
         # Calculate the difference between what the user want and what the order already has
         for actual_product in actual_products:
             try:
-                quantity = int(request.form.get(str(actual_product["id"]))) - (actual_product["quantity"])  # type: ignore
+                quantity = int(request.form.get(str(actual_product["id"]))) - (actual_product["quantity"]) 
             except ValueError:
                 quantity = -actual_product["quantity"]
             except (IndexError, KeyError):
@@ -89,13 +89,13 @@ def edit_order():
     else: # GET
         order_id = request.args.get("order-id")
         order = db.get_order(order_id)
-        if len(order) != 1: # type: ignore
+        if len(order) != 1:
             return apology("Pedido não encontrado")
         order_products = db.list_products(order)
         return render_template(
             "edit-order.html",
-            order=order[0], # type: ignore
-            order_products=order_products[int(order_id)], # type: ignore
+            order=order[0],
+            order_products=order_products[int(order_id)],
         )
 
 
@@ -104,9 +104,9 @@ def edit_order():
 def delete_order():
     order_id = request.form.get("order-id")
     order = db.get_order_status(order_id)
-    if len(order) != 1: # type: ignore
+    if len(order) != 1:
         return apology("Não foi possível encontrar o pedido")
-    order = order[0] # type: ignore
+    order = order[0]
     action = request.form.get("action")
     if action == "delete":
         db.delete_order_products(order_id)
@@ -323,10 +323,10 @@ def products_edit():
             product_type = db.get_full_product_type_by_id(
                 request.form.get("product-type-id")
             )
-            if len(product_type) != 1: # type: ignore
+            if len(product_type) != 1:
 
                 return apology("Tipo de produto não encontrado")
-            product_type = product_type[0] # type: ignore
+            product_type = product_type[0]
             new_values = {
                 "name": request.form.get("type-name"),
                 "status": request.form.get("type-status"),
@@ -353,9 +353,9 @@ def products_edit():
         # Serve page for editing a product
         if request.args.get("product-id"):
             product = db.get_product_by_id(request.args.get("product-id"))
-            if len(product) != 1: # type: ignore
+            if len(product) != 1:
                 return apology("Produto não encontrado")
-            product = product[0] # type: ignore
+            product = product[0]
             product_types = db.get_active_product_types()
             return render_template(
                 "edit-product.html", product=product, product_types=product_types
@@ -365,9 +365,9 @@ def products_edit():
             product_type = db.get_full_product_type_by_id(
                 request.args.get("product-type-id")
             )
-            if len(product_type) != 1: # type: ignore
+            if len(product_type) != 1:
                 return apology("Tipo de produto não encontrado")
-            product_type = product_type[0] # type: ignore
+            product_type = product_type[0]
             return render_template("edit-product-type.html", product_type=product_type)
 
 
@@ -459,7 +459,7 @@ def new_order():
         product_types = db.get_product_types()
         products = [{"type": type["type_name"],
                      "products": db.get_products_by_type(type["id"])}
-                      for type in product_types] # type: ignore
+                      for type in product_types]
         return render_template("new-order.html", products=products)
 
 

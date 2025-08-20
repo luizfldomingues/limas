@@ -28,6 +28,10 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+@app.teardown_appcontext
+def teardown_appcontext(exception=None):
+    db.close_db_connection(exception)
+
 
 @app.route("/")
 @login_required
@@ -62,7 +66,7 @@ def edit_order():
 
         # Request the list of the actual products
         actual_products = db.list_products(order)[int(order_id)] # type: ignore
-        
+
         # Calculate the difference between what the user want and what the order already has
         for actual_product in actual_products:
             try:
@@ -100,9 +104,9 @@ def edit_order():
 def delete_order():
     order_id = request.form.get("order-id")
     order = db.get_order_status(order_id)
-    if len(order) != 1:
+    if len(order) != 1: # type: ignore
         return apology("Não foi possível encontrar o pedido")
-    order = order[0]
+    order = order[0] # type: ignore
     action = request.form.get("action")
     if action == "delete":
         db.delete_order_products(order_id)

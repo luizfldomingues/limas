@@ -1,6 +1,6 @@
 import sqlite3
 import os
-from flask import session
+from flask import session, g
 
 #TODO: Implement one connections per request
 
@@ -14,38 +14,67 @@ class Database:
             self._init_database()
 
     def _get_db_connection(self):
-        """Establishes a new database connection."""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+        """Returns the connection of the context"""
+        if 'db_conn' not in g:
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            g.db_conn = conn
+            return conn
+        return g.db_conn
+
+    def close_db_connection(self, exception=None):
+        """Closes the connection of the context"""
+        conn = g.pop('db_conn', None)
+        if conn is not None:
+            if exception is None:
+                conn.commit()
+            conn.close()
 
     def _init_database(self):
         """Initializes the database schema from an SQL script."""
         with open('database/limas.sql', 'r') as sql_file:
             sql_script = sql_file.read()
-        with self._get_db_connection() as conn:
+        with sqlite3.connect(self.db_path) as conn:
             conn.executescript(sql_script)
             conn.commit()
             print("Novo banco de dados criado com sucesso")
 
     def _execute_query(self, query, params=(), fetchone=False, lastrowid=False):
         """Executes a given SQL query with optional parameters and returns the result."""
-        with self._get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(query, params)
-            if lastrowid:
-                conn.commit()
-                return cursor.lastrowid
-            if fetchone:
-                result = cursor.fetchone()
-                if not result:
-                    result = {}
-                result = dict(result)
-            else:
-                result = [dict(row) for row in cursor.fetchall()]
-
+        conn = self._get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, params)
+        if lastrowid:
             conn.commit()
-            return result
+            return cursor.lastrowid
+        if fetchone:
+            result = cursor.fetchone()
+            if not result:
+                result = {}
+            result = dict(result)
+        else:
+            result = [dict(row) for row in cursor.fetchall()]
+
+        conn.commit()
+        return result
+
+
+    #def _readonly_query(self, query, params=(), fetch_limit=0):
+    #    with self._get_db_connection() as conn:
+    #        cur = conn.cursor()
+    #        cur.execute(query, params)
+    #    if fetch_limit:
+    #        rows = cur.fetchmany(fetch_limit)
+    #    else:
+    #        rows = cur.fetchall()
+    #    return [dict(row) for row in rows]
+    #
+    #def _readonly_fetchone_query(self, query, params=()):
+    #    with self._get_db_connection() as conn:
+    #        cur = con.cursor()
+    #        cur.execute()
+    #        
+    #        
 
     def add_order_products(self, order_id, increment_products):
         """Adds new products to an existing order, creating an order increment."""

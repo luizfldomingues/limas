@@ -2,8 +2,6 @@ import sqlite3
 import os
 from flask import session, g
 
-#TODO: Implement one connections per request
-
 class Database:
     """Handles all database interactions for the Flask application."""
 

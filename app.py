@@ -9,13 +9,15 @@ import preferences
 # Configure application
 app = Flask(__name__)
 
+# TODO: Move configuration to another file
 # Custom filter
 app.jinja_env.filters["brl"] = brl
 
+# TODO: Update session filesystem to a modern one
 # Configure session to use filesystem (instead of signed cookies)
-# TODO: Understand what this means
-app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_PERMANENT"] = True
+app.config["PERMANENT_SESSION_LIFETIME"] = 604800 #7 days in seconds
 Session(app)
 
 

@@ -17,7 +17,7 @@ app.jinja_env.filters["brl"] = brl
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_PERMANENT"] = True
-app.config["PERMANENT_SESSION_LIFETIME"] = 604800 #7 days in seconds
+app.config["PERMANENT_SESSION_LIFETIME"] = 604800  # 7 days in seconds
 Session(app)
 
 
@@ -30,6 +30,8 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+
+# Close database connection
 @app.teardown_appcontext
 def teardown_appcontext(exception=None):
     db.close_db_connection(exception)
@@ -72,23 +74,24 @@ def edit_order():
         # Calculate the difference between what the user want and what the order already has
         for actual_product in actual_products:
             try:
-                quantity = int(request.form.get(str(actual_product["id"]))) - (actual_product["quantity"]) 
+                quantity = (
+                    int(request.form.get(str(actual_product["id"])))
+                    - (actual_product["quantity"])
+                )
             except ValueError:
                 quantity = -actual_product["quantity"]
             except (IndexError, KeyError):
-                return(apology("Não foi possível processar a edição"))
+                return apology("Não foi possível processar a edição")
             if quantity != 0:
                 increment_products.append(
-                    {"quantity": quantity,
-                    "id": actual_product["id"]}
+                    {"quantity": quantity, "id": actual_product["id"]}
                 )
         db.update_order(order_id, customer, table)
         db.add_order_products(order_id, increment_products)
         flash(f"Pedido Nº.{order_id} editado com sucesso")
         return redirect("/")
 
-
-    else: # GET
+    else:  # GET
         order_id = request.args.get("order-id")
         order = db.get_order(order_id)
         if len(order) != 1:
@@ -326,7 +329,6 @@ def products_edit():
                 request.form.get("product-type-id")
             )
             if len(product_type) != 1:
-
                 return apology("Tipo de produto não encontrado")
             product_type = product_type[0]
             new_values = {
@@ -450,18 +452,21 @@ def new_order():
         table_number = request.form.get("table-number")
 
         # Register the order into the orders table
-        order_id = db.create_order(user_id=session["user_id"],
-                                   customer_name=customer, 
-                                   table_number=table_number)
+        order_id = db.create_order(
+            user_id=session["user_id"],
+            customer_name=customer,
+            table_number=table_number,
+        )
         db.add_order_products(order_id=order_id, increment_products=order_products)
         flash(f"Pedido N.º{order_id} registrado")
         return redirect("/")
     # User reached route via GET
     else:
         product_types = db.get_product_types()
-        products = [{"type": type["type_name"],
-                     "products": db.get_products_by_type(type["id"])}
-                      for type in product_types]
+        products = [
+            {"type": type["type_name"], "products": db.get_products_by_type(type["id"])}
+            for type in product_types
+        ]
         return render_template("new-order.html", products=products)
 
 
@@ -544,4 +549,3 @@ def register():
 
     else:
         return render_template("register.html")
-

@@ -275,4 +275,17 @@ class Database:
         row = self._fetchone_query("SELECT id FROM users WHERE username = ?", (username,))
         return row['id'] if row else None
 
+    def get_sales_report(self, start_date, end_date):
+        """Returns the total sales in the period and the sold products"""
+        sales = self._fetchone_query("SELECT SUM(op.current_price * op.quantity) total "
+                                     "FROM order_products op "
+                                     "WHERE op.order_id "
+                                     "IN (SELECT orders.id FROM orders "
+                                     "WHERE orders.order_status = 'completed' "
+                                     "AND order_time "
+                                     "BETWEEN DATETIME(?, '-3 hours') "
+                                     "AND DATETIME(?, '-3 hours'))",
+                                     (start_date, end_date))
+        return sales
+
 db = Database("./database/limas.db")

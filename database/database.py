@@ -275,4 +275,4 @@ class Database:
         row = self._fetchone_query("SELECT id FROM users WHERE username = ?", (username,))
         return row['id'] if row else None
 
-db = Database("/database/limas.db")
+db = Database("./database/limas.db")

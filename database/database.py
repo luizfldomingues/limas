@@ -50,9 +50,11 @@ class Database:
     def _fetchone_query(self, query, params=()):
         """Execute a query and return a dict with the gotten row.
         if no row is found, return None"""
+        print(query)
         row = self._get_db_connection().execute(query, params).fetchone()
         if row:
             return dict(row)
+        return dict()
 
     def _execute_query(self, query, params=()):
         """Execute a query, return cursor.lastrowid"""
@@ -277,15 +279,33 @@ class Database:
 
     def get_sales_report(self, start_date, end_date):
         """Returns the total sales in the period and the sold products"""
-        sales = self._fetchone_query("SELECT SUM(op.current_price * op.quantity) total "
+        where_condition = ("WHERE orders.order_status = 'completed' "
+                           "AND orders.order_time "
+                           "BETWEEN DATETIME(?, '-3 hours') "
+                           "AND DATETIME(?, '-3 hours')")
+
+        report = dict()
+
+        report.update(self._fetchone_query("SELECT COALESCE(SUM(op.current_price * op.quantity), 0) total "
                                      "FROM order_products op "
                                      "WHERE op.order_id "
-                                     "IN (SELECT orders.id FROM orders "
-                                     "WHERE orders.order_status = 'completed' "
-                                     "AND order_time "
-                                     "BETWEEN DATETIME(?, '-3 hours') "
-                                     "AND DATETIME(?, '-3 hours'))",
-                                     (start_date, end_date))
-        return sales
+                                     f"IN (SELECT orders.id FROM orders {where_condition})",
+                                     (start_date, end_date)))
+
+        report.update(self._fetchone_query(f"SELECT COUNT(*) orders_count FROM orders {where_condition}",
+                                           (start_date, end_date)))
+
+        report.update({"products_total": self._fetchall_query(
+            "SELECT SUM(op.current_price * op.quantity) total, * "
+            "FROM order_products op "
+            "JOIN products p ON op.product_id = p.id "
+            "WHERE op.order_id "
+            f"IN (SELECT orders.id FROM orders {where_condition}) "
+            "GROUP by op.product_id", (start_date, end_date))})
+        return report
+
+
+    def get_today(self):
+        return self._fetchone_query("SELECT DATE(DATETIME(current_timestamp, '-3 hours')) today")["today"]
 
 db = Database("./database/limas.db")

@@ -281,8 +281,8 @@ class Database:
         """Returns the total sales in the period and the sold products"""
         where_condition = ("WHERE orders.order_status = 'completed' "
                            "AND orders.order_time "
-                           "BETWEEN DATETIME(?, '-3 hours') "
-                           "AND DATETIME(?, '-3 hours')")
+                           "BETWEEN DATETIME(?, '-3 hours', '-1 day') "
+                           "AND DATETIME(?, '-3 hours', '+1 day')")
 
         report = dict()
 
@@ -292,16 +292,21 @@ class Database:
                                      f"IN (SELECT orders.id FROM orders {where_condition})",
                                      (start_date, end_date)))
 
+        # Get the number of orders
         report.update(self._fetchone_query(f"SELECT COUNT(*) orders_count FROM orders {where_condition}",
                                            (start_date, end_date)))
 
+        # Get the total sold by product
         report.update({"products_total": self._fetchall_query(
-            "SELECT SUM(op.current_price * op.quantity) total, * "
+            "SELECT SUM(op.current_price * op.quantity) total, sum(op.quantity) quantity, op.product_id, price, product_name, product_status "
             "FROM order_products op "
             "JOIN products p ON op.product_id = p.id "
             "WHERE op.order_id "
             f"IN (SELECT orders.id FROM orders {where_condition}) "
-            "GROUP by op.product_id", (start_date, end_date))})
+            "GROUP by op.product_id "
+            "ORDER BY total DESC", (start_date, end_date))})
+
+
         return report
 
 

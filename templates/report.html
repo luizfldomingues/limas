@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Relatório
+{% endblock %}
+
+{% block main %}
+{% if report.products_total %}
+    <div class="py-1 my-1">
+        <table class="table table-bordered table-striped">
+        <thead>
+            <tr class="table-primary">
+                <th colspan="3">
+                    Total de vendas
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th colspan="2">Data inicial:</th>
+                <td>{{ start_date }}</td>
+            </tr>
+            <tr>
+                <th colspan="2">Data final:</th>
+                <td>{{ end_date }}</td>
+            </tr>
+
+            <tr>
+                <th colspan="2">Número de pedidos:</th>
+                <td>{{ report.orders_count }}</td>
+            </tr>
+            <tr>
+                <th colspan="2">Valor médio por pedido:</th>
+                <td>{{( report.total // report.orders_count) | brl }}</td>
+            </tr>
+
+            <tr>
+                <th colspan="2">Total: </th>
+                <td>{{ report.total | brl }}</td>
+            </tr>
+        </tbody>
+        </table>
+    <div class="py-1 my-1">
+        <table class="table table-bordered table-striped">
+        <thead>
+            <tr class="table-primary">
+                <th colspan="4">
+                    Vendas por produto
+                </th>
+            </tr>
+            <tr class="">
+              <th>Produto</th>
+              <th>Preço</th>
+              <th>Quantidade</th>
+              <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+          {% for product_total in report.products_total %}
+            <tr>
+              <td>{{ product_total.product_name }}</td>
+              <td>{{ product_total.price | brl }}</td>
+              <td>{{ product_total.quantity }}</td>
+              <td>{{ product_total.total | brl }}</td>
+            <tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% endif %}
+{% endblock %}

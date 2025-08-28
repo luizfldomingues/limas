@@ -502,9 +502,10 @@ def reports():
     """Page for querying for sales reports"""
     if not request.args:
         return render_template("query-report.html", today=db.get_today())
-    a = db.get_sales_report(request.args.get("start-date"), request.args.get("end-date"))
-    print(a)
-    return a
+    start_date, end_date = request.args.get("start-date"), request.args.get("end-date")
+    report = db.get_sales_report(request.args.get("start-date"), request.args.get("end-date"))
+    return render_template("report.html", start_date=start_date, end_date=end_date, report=report)
+    
 
 
 @app.route("/register", methods=["GET", "POST"])

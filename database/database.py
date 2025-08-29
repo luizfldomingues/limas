@@ -350,9 +350,9 @@ class Database:
         """Returns the total sales in the period and the sold products"""
         where_condition = (
             "WHERE orders.order_status = 'completed' "
-            "AND orders.order_time "
-            "BETWEEN DATETIME(?, '-3 hours', '-1 day') "
-            "AND DATETIME(?, '-3 hours', '+1 day')"
+            "AND DATE(orders.order_time, '-3 hours') "
+            "BETWEEN DATE(?) "
+            "AND DATE(?)"
         )
 
         report = dict()

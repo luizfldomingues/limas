@@ -58,7 +58,7 @@ Relatório
         <tbody>
           {% for product_total in report.products_total %}
             <tr>
-              <td>{{ product_total.product_name }}</td>
+              <td>{{ product_total.product_name | capitalize }}</td>
               <td>{{ product_total.price | brl }}</td>
               <td>{{ product_total.quantity }}</td>
               <td>{{ product_total.total | brl }}</td>

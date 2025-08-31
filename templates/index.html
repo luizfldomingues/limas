@@ -6,10 +6,13 @@ Página Inicial
 
 {% block main %}
     <div class="py-1 my-1">
-        {% if orders %}
-        <div class="mb-3 mt-0">
-            <h5><a class="link-underline-opacity-0" href="/new-order">Novo pedido</a><h5>
+        <div class="mb-3">
+            <h4><a class="link-underline-opacity-0" href="/new-order">Novo pedido</a></h4>
+            {% if not orders %}
+            <h3>Sem pedidos por aqui</h3>
+            {% endif %}
         </div>
+        {% if orders %}
         {% for order in orders %}
         <table class="table table-bordered table-striped">
             <thead>
@@ -89,10 +92,6 @@ Página Inicial
     {% endfor %}
     </div>
     {% else %}
-    <div class="m-3">
-        <h3>Sem pedidos por aqui</h3>
-        <h4><a class="link-underline-opacity-0" href="/new-order">Novo pedido</a></h4>
-    </div>
     {% endif %}
 
 {% endblock %}

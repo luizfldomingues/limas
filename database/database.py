@@ -51,7 +51,6 @@ class Database:
     def _fetchone_query(self, query, params=()):
         """Execute a query and return a dict with the gotten row.
         if no row is found, return None"""
-        print(query)
         row = self._get_db_connection().execute(query, params).fetchone()
         if row:
             return dict(row)

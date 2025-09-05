@@ -170,8 +170,7 @@ def increment_order():
     if request.method == "POST":
         order_id = request.form.get("order-id")
         if not order_id or not order_id.isnumeric():
-            print(f"O id do pedido não foi reconhecido id: {order_id}")
-            return apology("Não foi possível receber o id do pedido")
+            return apology("Não foi possível encontrar o pedido")
 
         # Append each ordered product to the order_products list
         increment_products = []

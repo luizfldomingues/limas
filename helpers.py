@@ -6,9 +6,9 @@ def apology(message, code="400"):
 
 def brl(value):
     """Format value from BRL cents to BRL"""
-    if type(value) != int:
+    if type(value) is not int:
         value = 0
-    return f"R${value/100:,.2f}".replace(".", ",")
+    return f"R${value / 100:,.2f}".replace(".", ";").replace(",", ".").replace(";", ",")
 
 # TODO: Understand how this works
 def login_required(f):

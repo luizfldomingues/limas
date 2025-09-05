@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Relatório
+{% endblock %}
+
+{% block main %}
+<h3>Selecione o período desejado</h3>
+<form action="/reports" method="get">
+    <div class="d-flex flex-column justify-content-center form-group m-5 mx-auto w-50">
+      <div class="m-2">
+        <label>Dia inicial</label>
+        <input name="start-date" type="date" class="form-control" value="{{ today }}">
+      </div>
+      <div class="m-2">
+        <label>Dia final</label>
+        <input name="end-date" type="date" class="form-control" value="{{ today }}">
+      </div>
+    </div>
+    <div class="m-2">
+        <button class="border btn btn-primary" type="submit">Gerar Relatório</button>
+    </div>
+</form>
+{% endblock %}

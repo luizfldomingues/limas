@@ -9,13 +9,15 @@ import preferences
 # Configure application
 app = Flask(__name__)
 
+# TODO: Move configuration to another file
 # Custom filter
 app.jinja_env.filters["brl"] = brl
 
+# TODO: Update session filesystem to a modern one
 # Configure session to use filesystem (instead of signed cookies)
-# TODO: Understand what this means
-app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_PERMANENT"] = True
+app.config["PERMANENT_SESSION_LIFETIME"] = 604800  # 7 days in seconds
 Session(app)
 
 
@@ -27,6 +29,12 @@ def after_request(response):
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
+
+
+# Close database connection
+@app.teardown_appcontext
+def teardown_appcontext(exception=None):
+    db.close_db_connection(exception)
 
 
 @app.route("/")
@@ -48,43 +56,42 @@ def edit_order():
         order_id = request.form.get("order-id")
         customer = request.form.get("customer")
         table = request.form.get("table-number")
+
         # Check if the table number is valid
         if table:
             if not table.isnumeric():
                 return apology("Número de mesa inválido")
         increment_products = []
-        intended_products = {}
+
         # Request the order from the database
         order = db.get_order(order_id)
         if len(order) != 1:
             return apology("Não foi possível encontrar o pedido")
+
         # Request the list of the actual products
         actual_products = db.list_products(order)[int(order_id)]
-        # Populates the intended products list
+
+        # Calculate the difference between what the user want and what the order already has
         for actual_product in actual_products:
-            if request.form.get(str(actual_product["id"])):
-                if request.form.get(str(actual_product["id"])).isnumeric():
-                    intended_products[actual_product["id"]] = int(
-                        request.form.get(str((actual_product["id"])))
-                    )
-                else:
-                    intended_products[actual_product["id"]] = 0
-        # Populates the increment_products list
-        for actual_product in actual_products:
-            if type(intended_products.get(actual_product["id"])) != None:
-                quantity = intended_products[actual_product["id"]] - int(
-                    actual_product["quantity"]
+            try:
+                quantity = (
+                    int(request.form.get(str(actual_product["id"])))
+                    - (actual_product["quantity"])
                 )
-                if quantity != 0:
-                    increment_products.append(
-                        {"id": actual_product["id"], "quantity": quantity}
-                    )
+            except ValueError:
+                quantity = -actual_product["quantity"]
+            except (IndexError, KeyError):
+                return apology("Não foi possível processar a edição")
+            if quantity != 0:
+                increment_products.append(
+                    {"quantity": quantity, "id": actual_product["id"]}
+                )
         db.update_order(order_id, customer, table)
         db.add_order_products(order_id, increment_products)
         flash(f"Pedido Nº.{order_id} editado com sucesso")
         return redirect("/")
-    # User reached route via GET
-    else:
+
+    else:  # GET
         order_id = request.args.get("order-id")
         order = db.get_order(order_id)
         if len(order) != 1:
@@ -163,8 +170,7 @@ def increment_order():
     if request.method == "POST":
         order_id = request.form.get("order-id")
         if not order_id or not order_id.isnumeric():
-            print(f"O id do pedido não foi reconhecido id: {order_id}")
-            return apology("Não foi possível receber o id do pedido")
+            return apology("Não foi possível encontrar o pedido")
 
         # Append each ordered product to the order_products list
         increment_products = []
@@ -329,7 +335,7 @@ def products_edit():
                 "status": request.form.get("type-status"),
             }
             # Validate the new_values data
-            if not new_values["name"] or not new_values["status"] in [
+            if not new_values["name"] or new_values["status"] not in [
                 "active",
                 "inactive",
             ]:
@@ -430,36 +436,36 @@ def new_order():
         order_products = []
         # Append each ordered product to the order_products list
         try:
-            for product in request.form:
-                if product.isnumeric() and request.form.get(product).isnumeric():
-                    if int(request.form.get(product)) > 0:
+            for product_id, quantity in request.form.items():
+                if product_id.isnumeric() and quantity.isnumeric():
+                    if int(quantity) > 0:
                         order_products.append(
                             {
-                                "id": int(product),
-                                "quantity": int(request.form.get(product)),
+                                "id": int(product_id),
+                                "quantity": int(quantity),
                             }
                         )
-        except:
-            return apology("Não foi possível registrar o produto")
+        except Exception as e:
+            return apology(f"{e}")
         customer = request.form.get("customer")
         table_number = request.form.get("table-number")
 
         # Register the order into the orders table
-        order_id = db.create_order(session["user_id"], customer, table_number)
-        db.add_order_products(order_id, order_products)
+        order_id = db.create_order(
+            user_id=session["user_id"],
+            customer_name=customer,
+            table_number=table_number,
+        )
+        db.add_order_products(order_id=order_id, increment_products=order_products)
         flash(f"Pedido N.º{order_id} registrado")
         return redirect("/")
     # User reached route via GET
     else:
         product_types = db.get_product_types()
-        products = []
-        for type in product_types:
-            products.append(
-                {
-                    "type": type["type_name"],
-                    "products": db.get_products_by_type(type["id"]),
-                }
-            )
+        products = [
+            {"type": type["type_name"], "products": db.get_products_by_type(type["id"])}
+            for type in product_types
+        ]
         return render_template("new-order.html", products=products)
 
 
@@ -493,8 +499,15 @@ def order_details():
 @login_required
 def reports():
     """Page for querying for sales reports"""
-    flash("TODO")
-    return render_template("blank.html")
+    if not request.args:
+        return render_template("query-report.html", today=db.get_today())
+    start_date, end_date = request.args.get("start-date"), request.args.get("end-date")
+    report = db.get_sales_report(
+        request.args.get("start-date"), request.args.get("end-date")
+    )
+    return render_template(
+        "report.html", start_date=start_date, end_date=end_date, report=report
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -542,4 +555,3 @@ def register():
 
     else:
         return render_template("register.html")
-

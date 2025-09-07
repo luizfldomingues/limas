@@ -390,6 +390,21 @@ class Database:
                 )
             }
         )
+        report.update(
+            {
+                "total_per_user": self._fetchall_query(
+                    "SELECT SUM(op.current_price * op.quantity) total_sold, users.username username "
+                    "FROM order_products op "
+                    "JOIN order_increments oi ON op.order_increment_id = oi.id "
+                    "JOIN users ON oi.user_id = users.id "
+                    "WHERE op.order_id "
+                    f"IN (SELECT orders.id FROM orders {where_condition}) "
+                    "GROUP by users.id "
+                    "ORDER BY total_sold DESC",
+                    (start_date, end_date),
+                )
+            }
+        )
         return report
 
     def get_today(self):

@@ -379,12 +379,12 @@ class Database:
         report.update(
             {
                 "products_total": self._fetchall_query(
-                    "SELECT SUM(op.current_price * op.quantity) total, sum(op.quantity) quantity, op.product_id, price, product_name, product_status "
+                    "SELECT SUM(op.current_price * op.quantity) total, sum(op.quantity) quantity, op.product_id, op.current_price price, product_name, product_status "
                     "FROM order_products op "
                     "JOIN products p ON op.product_id = p.id "
                     "WHERE op.order_id "
                     f"IN (SELECT orders.id FROM orders {where_condition}) "
-                    "GROUP by op.product_id "
+                    "GROUP by op.product_id, op.current_price "
                     "ORDER BY total DESC",
                     (start_date, end_date),
                 )

@@ -16,6 +16,7 @@ CREATE TABLE products (
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     username TEXT NOT NULL UNIQUE,
+    role TEXT CHECK (role IN ('manager', 'staff')) NOT NULL DEFAULT 'staff',
     hash TEXT NOT NULL
 );
 

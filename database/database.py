@@ -331,7 +331,15 @@ class Database:
         )
         return row["total"] if row else 0
 
-    def create_user(self, username, password_hash):
+    def get_users(self, roles=('manager', 'staff')):
+        """Retrieves all of the users and their information"""
+        self._fetchall_query(
+            "SELECT * FROM users "
+            "WHERE role in ?",
+            roles
+        )
+
+    def create_user(self, username, password_hash, role='staff'):
         """Creates a new user with a username and hashed password."""
         self._execute_query(
             "INSERT INTO users (username, hash) VALUES (?, ?)",
@@ -344,6 +352,17 @@ class Database:
             "SELECT id FROM users WHERE username = ?", (username,)
         )
         return row["id"] if row else None
+
+    def change_user_password(self, user_id, new_hash):
+        """Change the password of a user"""
+        self._execute_query(
+            "UPDATE users "
+            "SET hash=? "
+            "WHERE id=?",
+            (new_hash, user_id)
+        )
+    
+    def change_user_role
 
     def get_sales_report(self, start_date, end_date):
         """Returns the total sales in the period and the sold products"""

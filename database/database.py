@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from flask import session, g
+from helpers import placeholders
 
 
 class Database:
@@ -331,19 +332,27 @@ class Database:
         )
         return row["total"] if row else 0
 
-    def get_users(self, roles=('manager', 'staff')):
-        """Retrieves all of the users and their information"""
-        self._fetchall_query(
-            "SELECT * FROM users "
-            "WHERE role in ?",
-            roles
-        )
-
+    # User operations
     def create_user(self, username, password_hash, role='staff'):
         """Creates a new user with a username and hashed password."""
         self._execute_query(
             "INSERT INTO users (username, hash) VALUES (?, ?)",
             (username, password_hash),
+        )
+
+    def get_users(self, roles=('manager', 'staff')):
+        """Retrieves all of the users and their information"""
+        return self._fetchall_query(
+            "SELECT * FROM users "
+            f"WHERE role IN ({placeholders(len(roles))})",
+            roles
+        )
+
+    def get_user_by_id(self, user_id):
+        return self._fetchone_query(
+            "SELECT * from users "
+            "WHERE id = ?",
+            (user_id,)
         )
 
     def get_user_id_by_username(self, username):
@@ -357,12 +366,19 @@ class Database:
         """Change the password of a user"""
         self._execute_query(
             "UPDATE users "
-            "SET hash=? "
-            "WHERE id=?",
+            "SET hash = ? "
+            "WHERE id = ?",
             (new_hash, user_id)
         )
-    
-    def change_user_role
+
+    def change_user_role(self, user_id, new_role):
+        """Changes the user role"""
+        self._execute_query(
+            "UPDATE users "
+            "SET role = ? "
+            "WHERE id = ?",
+            (new_role, user_id)
+        )
 
     def get_sales_report(self, start_date, end_date):
         """Returns the total sales in the period and the sold products"""

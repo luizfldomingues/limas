@@ -3,7 +3,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from database.database import db
 
-from helpers import apology, brl, login_required
+from helpers import apology, brl, login_required, manager_only
 import preferences
 
 # Configure application
@@ -240,6 +240,7 @@ def login():
 
         # If password hash matches, logs the user
         session["user_id"] = user[0]["id"]
+        session["user_role"] = user[0]["role"]
         flash("Logado com sucesso!")
         return redirect("/")
     # User reached route via GET
@@ -261,6 +262,7 @@ def logout():
 @app.route("/products/<status>")
 @app.route("/products", defaults={"status": "active"})
 @login_required
+@manager_only
 def products(status):
     if status == "active":
         product_types = db.get_product_types()
@@ -284,6 +286,7 @@ def products(status):
 
 @app.route("/products/edit", methods=["GET", "POST"])
 @login_required
+@manager_only
 def products_edit():
     """Edit a product or product type"""
     if request.method == "POST":
@@ -376,6 +379,7 @@ def products_edit():
 
 @app.route("/products/new/product", methods=["GET", "POST"])
 @login_required
+@manager_only
 def products_new_product():
     if request.method == "POST":
         # User wants to create a new product
@@ -407,6 +411,7 @@ def products_new_product():
 
 @app.route("/products/new/product-type", methods=["GET", "POST"])
 @login_required
+@manager_only
 def products_new_product_type():
     if request.method == "POST":
         # User wants to create a new product type
@@ -497,6 +502,7 @@ def order_details():
 
 @app.route("/reports")
 @login_required
+@manager_only
 def reports():
     """Page for querying for sales reports"""
     if not request.args:
@@ -545,8 +551,12 @@ def register():
                 return redirect("/register")
 
             # Logs the user
-            uid = db.get_user_id_by_username(username)
-            session["user_id"] = uid
+            user = db.get_user_by_username(username)
+            if len(user) != 0:
+                return apology("Algo deu errado com o registro")
+
+            session["user_id"] = user[0]["id"]
+            session["user_role"] = user[0]["role"]
             flash("Registrado com sucesso!")
             return redirect("/")
         else:

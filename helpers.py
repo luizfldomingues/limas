@@ -1,4 +1,4 @@
-from flask import redirect, render_template, session
+from flask import redirect, render_template, session, flash
 from functools import wraps
 
 def apology(message, code="400"):
@@ -28,3 +28,16 @@ def login_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+def manager_only(f):
+    """ Decorate routes to only allow managers to visit """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("user_role") != "manager":
+            flash("Área exclusiva para gerentes")
+            return redirect("/")
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+

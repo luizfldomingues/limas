@@ -10,6 +10,9 @@ def brl(value):
         value = 0
     return f"R${value / 100:,.2f}".replace(".", ";").replace(",", ".").replace(";", ",")
 
+def placeholders(n=0):
+    return ", ".join(['?']*n)
+
 # TODO: Understand how this works
 def login_required(f):
     """

@@ -13,6 +13,17 @@ class Filters:
             value = 0
         return f"R${value / 100:,.2f}".replace(".", ";").replace(",", ".").replace(";", ",")
 
+    @staticmethod
+    def translate(word):
+        translations = {
+            'staff': 'colaborador',
+            'manager': 'gerente',
+        }
+        try:
+            return translations[word]
+        except KeyError:
+            return word
+
 def placeholders(n=0):
     return ", ".join(['?']*n)
 

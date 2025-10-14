@@ -30,7 +30,7 @@ Editar produto
                     </th>
                     <td>
                         <div>
-                            <input class="form-control" name="product-price" type="number"">
+                            <input class="form-control" name="product-price" type="number">
                         </div>
                     </td>
                 </tr>
@@ -43,6 +43,7 @@ Editar produto
                                 {% for product_type in product_types %}
                                 <option value="{{ product_type.id }}">{{ product_type.type_name | capitalize }}</option>
                                 {% endfor %}
+                            </select>
                         </div>
                     </td>
                 </tr>

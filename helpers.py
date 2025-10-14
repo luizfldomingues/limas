@@ -4,11 +4,14 @@ from functools import wraps
 def apology(message, code="400"):
     return render_template("apology.html", message=message, code=code)
 
-def brl(value):
-    """Format value from BRL cents to BRL"""
-    if type(value) is not int:
-        value = 0
-    return f"R${value / 100:,.2f}".replace(".", ";").replace(",", ".").replace(";", ",")
+class Filters:
+    """ Definitions of filters, mainly used my jinja """
+    @staticmethod
+    def brl(value):
+        """Format value from BRL cents to BRL"""
+        if type(value) is not int:
+            value = 0
+        return f"R${value / 100:,.2f}".replace(".", ";").replace(",", ".").replace(";", ",")
 
 def placeholders(n=0):
     return ", ".join(['?']*n)

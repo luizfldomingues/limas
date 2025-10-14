@@ -565,3 +565,16 @@ def register():
 
     else:
         return render_template("register.html")
+
+
+@app.route("/users")
+@login_required
+@manager_only
+def users():
+    if request.method == "POST":
+        pass
+
+    # User reached route via get
+    else:
+        users = db.get_users()
+        return render_template("users.html", users=users)

@@ -508,7 +508,7 @@ def register():
 
     # User reached route via POST:
     if request.method == "POST":
-        if preferences.allow_new_users:
+        if preferences.allow_new_users or len(db.get_users()) == 0:
             username = request.form.get("username")
             password = request.form.get("password")
             confirmation = request.form.get("confirmation")
@@ -533,6 +533,12 @@ def register():
             else:
                 flash("Nome de usuário ja registrado")
                 return redirect("/register")
+
+            user = db.get_user_by_username(username)[0]
+
+            # If the user is the first to be registered, he is a manager
+            if len(db.get_users()) == 0:
+                db.change_user_role(user["id"], "manager")
 
             # Logs the user
             if not login_session(session, password=password, username=username):

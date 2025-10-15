@@ -77,8 +77,8 @@ def login_required(f):
         if not user:
             return apology("Usuário não encontrado no banco de dados")
         if not user["session_id"] == session.get("session_id"):
-            flash("Todas as suas sessões foram desconectadas. Por favor, entre novamente.")
             session.clear()
+            flash("Todas as suas sessões foram desconectadas. Por favor, entre novamente.")
             return redirect("/login")
         return f(*args, **kwargs)
 

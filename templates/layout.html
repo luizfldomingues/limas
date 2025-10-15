@@ -54,9 +54,11 @@
 
         {% if get_flashed_messages() %}
             <header>
-                <div class="alert alert-primary mb-0 text-center" role="alert">
-                    {{ get_flashed_messages() | join(" ") }}
+              {% for message in get_flashed_messages() %}
+                <div class="alert alert-primary mb-0 pb-0 text-center" role="alert">
+                    <p>{{message}}</p>
                 </div>
+              {% endfor %}
             </header>
         {% endif %}
 

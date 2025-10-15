@@ -1,8 +1,9 @@
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.serving import generate_adhoc_ssl_context
 from database.database import db
-from helpers import apology, Filters, login_required, manager_only
+from helpers import Constants, apology, Filters, login_required, manager_only
 import preferences
 
 # Configure application
@@ -552,7 +553,7 @@ def register():
 
             # Logs the user
             user = db.get_user_by_username(username)
-            if len(user) != 0:
+            if not len(user):
                 return apology("Algo deu errado com o registro")
 
             session["user_id"] = user[0]["id"]
@@ -567,14 +568,58 @@ def register():
         return render_template("register.html")
 
 
-@app.route("/users")
+@app.route("/users", methods=["GET", "POST"])
 @login_required
 @manager_only
 def users():
     if request.method == "POST":
-        pass
+        # Check if user exists
+        u_id = db.get_user_by_id(request.form.get("user-id"))
+        if u_id:
+            u_id = u_id['id']
+        else:
+            return apology((request.form, db.get_user_by_id(request.form.get("user-id")), "Usuário não encontrado"))
+
+        # Process password change
+        password = request.form.get("password")
+        c_password = request.form.get("confirm-password")
+        if password and c_password:
+            if password != c_password:
+                flash("As senhas não são iguais.")
+                return redirect(request.url)
+            db.change_user_password(u_id, generate_password_hash(password))
+            flash("Senha alterada com sucesso!")
+
+        # Process username change
+        username = request.form.get("username")
+        old_username = request.form.get("old-username")
+        if username and username != old_username:
+            if db.get_user_by_username(username):
+                flash("Nome de usuário ja existe!")
+                return redirect(request.url)
+            db.change_username(u_id, username)
+            flash("Nome de usuário alterado com sucesso!")
+
+        # Process role change
+        role = request.form.get("role")
+        old_role = request.form.get("old-role")
+        if role and role != old_role:
+            if role in (Constants.roles):
+                if u_id == session.get("user_id"):
+                    flash("Você não pode tirar seu cargo de gerente.")
+                else:
+                    db.change_user_role(u_id, role)
+                    flash(f"Mudança de usuário {username} para {Filters.translate(role)} bem sucedida.")
+            else:
+                return apology("Algo deu errado com a mudança de cargo")
+        return redirect(request.url)
 
     # User reached route via get
     else:
-        users = db.get_users()
-        return render_template("users.html", users=users)
+        if request.args.get("user-id"):
+            user = db.get_user_by_id(request.args.get("user-id"))
+            if not user:
+                return apology("Usuário não encontrado")
+            return render_template("user.html", user=user)
+        return render_template("users.html", users=db.get_users())
+

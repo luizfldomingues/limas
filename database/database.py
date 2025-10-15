@@ -364,16 +364,26 @@ class Database:
 
     def change_user_password(self, user_id, new_hash):
         """Change the password of a user"""
-        self._execute_query(
+        return self._execute_query(
             "UPDATE users "
             "SET hash = ? "
             "WHERE id = ?",
             (new_hash, user_id)
         )
 
+    def change_username(self, user_id, new_username):
+        """Change the username of a user
+           Assumes that there is not user with that username"""
+        return self._execute_query(
+            "UPDATE users "
+            "SET username = ? "
+            "WHERE id = ?",
+            (new_username, user_id)
+        )
+
     def change_user_role(self, user_id, new_role):
         """Changes the user role"""
-        self._execute_query(
+        return self._execute_query(
             "UPDATE users "
             "SET role = ? "
             "WHERE id = ?",

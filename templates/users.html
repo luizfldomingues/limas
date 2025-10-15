@@ -28,7 +28,12 @@ Usuários
           <td>{{ user.id }}</td>
           <td>{{ user.username }}</td>
           <td>{{ user.role | translate | capitalize }}</td>
-          <td></td>
+          <td>
+            <form action="/users" method="get">
+                <input type="hidden" name="user-id" value="{{ user.id }}">
+                <button class="border btn btn-secondary" type="submit">...</button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>

@@ -4,6 +4,10 @@ from functools import wraps
 def apology(message, code="400"):
     return render_template("apology.html", message=message, code=code)
 
+class Constants:
+    """Definitiosn of contansts used accross the code"""
+    roles = ("staff", "manager")
+
 class Filters:
     """ Definitions of filters, mainly used my jinja """
     @staticmethod

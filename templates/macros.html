@@ -84,3 +84,65 @@
         </div>
     </form>
 {% endmacro %}
+
+{% macro edit_user(user, action="/users") %}
+<div class="mt-3">
+    <form action="/users" method="post">
+        <input class="form-control" name="user-id" type="hidden" value="{{ user.id }}">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr class="table-warning">
+                    <td colspan="2" >
+                        Editar Usuário Nº{{ user.id }}
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Username</td>
+                    <td>
+                        <div>
+                            <input name="old-username" type="hidden" value="{{ user.username }}">
+                            <input class="form-control" name="username" type="text" value="{{ user.username }}">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Privilégio</td>
+                    <td>
+                        <div>
+                            <input name="old-role" type="hidden" value="{{ user.role }}">
+                            <select class="form-control" name="role">
+                                {% for role in ("manager", "staff") %}
+                                <option {% if role == user.role %}selected{% endif %} value="{{ role }}">{{ role | translate | capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </td>
+                <tr>
+                    <td>Senha</td>
+                    <td>
+                        <div>
+                            <input autocomplete="off" class="form-control" name="password" placeholder="Nova senha" type="password">
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Confirmar Senha</td>
+                    <td>
+                        <div>
+                            <input autocomplete="off" class="form-control" name="confirm-password" placeholder="Confirmar Senha" type="password">
+                        </div>
+                    </td>
+                </tr>
+            <tfoot>
+                <tr>
+                    <td colspan="3">
+                        <button class="border btn btn-warning" type="submit">Confirmar Edição</button>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </form>
+</div>
+{% endmacro %}

@@ -1,8 +1,9 @@
 import sqlite3
 import os
 from flask import session, g
-from helpers import placeholders
 
+def placeholders(n=0):
+    return ", ".join(['?']*n)
 
 class Database:
     """Handles all database interactions for the Flask application."""
@@ -388,6 +389,15 @@ class Database:
             "SET role = ? "
             "WHERE id = ?",
             (new_role, user_id)
+        )
+
+    def change_user_session_id(self, user_id, new_id):
+        """ Changes the user session id to new_id """
+        return self._execute_query(
+            "UPDATE users "
+            "SET session_id = ? "
+            "WHERE id = ?",
+            (new_id, user_id)
         )
 
     def get_sales_report(self, start_date, end_date):

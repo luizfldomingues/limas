@@ -18,7 +18,8 @@ CREATE TABLE users (
     username TEXT NOT NULL UNIQUE,
     role TEXT CHECK (role IN ('manager', 'staff')) NOT NULL DEFAULT 'staff',
     hash TEXT NOT NULL,
-    user_status TEXT CHECK (user_status IN ('active', 'inactive')) NOT NULL DEFAULT 'active'
+    user_status TEXT CHECK (user_status IN ('active', 'inactive')) NOT NULL DEFAULT 'active',
+    session_id INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE orders (

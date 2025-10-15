@@ -1,9 +1,8 @@
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
-from werkzeug.security import check_password_hash, generate_password_hash
-from werkzeug.serving import generate_adhoc_ssl_context
+from werkzeug.security import generate_password_hash
 from database.database import db
-from helpers import Constants, apology, Filters, login_required, manager_only
+from helpers import Constants, apology, Filters, login_required, login_session, manager_only, update_user_session
 import preferences
 
 # Configure application
@@ -213,8 +212,7 @@ def increment_order():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if session.get("user_id"):
-        # Clear the user session
-        session.clear()
+        return redirect("/")
 
     # User reached route via POST:
     if request.method == "POST":
@@ -222,39 +220,29 @@ def login():
         password = request.form.get("password")
         # Verify if the username, password and confirmation were submited
         if not username:
-            flash("Digite um nome de usuário")
+            flash("Digite um nome de usuário.")
             return redirect("/login")
         if not password:
-            flash("Digite uma senha")
+            flash("Digite uma senha.")
             return redirect("/login")
 
         # Verifies if the user exist and password matches
-        user = db.get_user_by_username(username)
-        if len(user) != 1 or not check_password_hash(
-            user[0]["hash"], request.form.get("password")
-        ):
-            flash("Usuário ou senha incorretos")
+        if not login_session(session, password, username=username):
+            flash("Usuário ou senha incorretos.")
             return redirect("/login")
-
-        # If password hash matches, logs the user
-        session["user_id"] = user[0]["id"]
-        session["user_role"] = user[0]["role"]
-        flash("Logado com sucesso!")
         return redirect("/")
+
     # User reached route via GET
     else:
         return render_template("login.html")
 
 
 @app.route("/logout")
+@login_required
 def logout():
     """Log user out"""
-
-    # Forget any user_id
     session.clear()
-
-    # Redirect user to login form
-    return redirect("/")
+    return redirect("/login")
 
 
 @app.route("/products/<status>")
@@ -271,15 +259,14 @@ def products(status):
         return render_template(
             "products.html", product_types=product_types, status=status
         )
-    elif status == "inactive":
-        product_types = db.get_inactive_product_types()
-        for c in range(len(product_types)):
-            product_types[c]["products"] = db.get_inactive_products_by_type(
-                product_types[c]["id"]
-            )
-        return render_template(
-            "products.html", product_types=product_types, status=status
+    product_types = db.get_inactive_product_types()
+    for c in range(len(product_types)):
+        product_types[c]["products"] = db.get_inactive_products_by_type(
+            product_types[c]["id"]
         )
+    return render_template(
+        "products.html", product_types=product_types, status=status
+    )
 
 
 @app.route("/products/edit", methods=["GET", "POST"])
@@ -304,9 +291,9 @@ def products_edit():
             # Validate the new_values data
             if (
                 not new_values["name"]
-                or not new_values["price"].isnumeric()
+                or (type(new_values["price"]) is str and not new_values["price"].isnumeric())
                 or len(db.get_product_type_by_id(new_values["type"])) != 1
-                or not new_values["status"] in ["active", "inactive"]
+                or new_values["status"] not in ["active", "inactive"]
             ):
                 return apology("Algum dos valores enviados são incompatíveis")
             try:
@@ -365,14 +352,13 @@ def products_edit():
                 "edit-product.html", product=product, product_types=product_types
             )
         # Serve page for editing a product type
-        elif request.args.get("product-type-id"):
-            product_type = db.get_full_product_type_by_id(
-                request.args.get("product-type-id")
-            )
-            if len(product_type) != 1:
-                return apology("Tipo de produto não encontrado")
-            product_type = product_type[0]
-            return render_template("edit-product-type.html", product_type=product_type)
+        product_type = db.get_full_product_type_by_id(
+            request.args.get("product-type-id")
+        )
+        if len(product_type) != 1:
+            return apology("Tipo de produto não encontrado")
+        product_type = product_type[0]
+        return render_template("edit-product-type.html", product_type=product_type)
 
 
 @app.route("/products/new/product", methods=["GET", "POST"])
@@ -518,8 +504,8 @@ def reports():
 def register():
     """Register new users"""
     if session.get("user_id"):
-        # Clear the user session
-        session.clear()
+        return redirect("/")
+
     # User reached route via POST:
     if request.method == "POST":
         if preferences.allow_new_users:
@@ -542,21 +528,18 @@ def register():
                 flash("As senhas não são iguais")
                 return redirect("/register")
             # Verify if the username already exist
-            try:
+            if len(db.get_user_by_username(username)) == 0:
                 db.create_user(username, generate_password_hash(password))
-            except:
+            else:
                 flash("Nome de usuário ja registrado")
                 return redirect("/register")
 
             # Logs the user
-            user = db.get_user_by_username(username)
-            if not len(user):
-                return apology("Algo deu errado com o registro")
-
-            session["user_id"] = user[0]["id"]
-            session["user_role"] = user[0]["role"]
+            if not login_session(session, password=password, username=username):
+                return apology("Algo deu errado ao registar a sessão")
             flash("Registrado com sucesso!")
             return redirect("/")
+
         else:
             flash("Sistema não aberto para novos usuários")
             return redirect("/")
@@ -577,6 +560,7 @@ def users():
         else:
             return apology((request.form, db.get_user_by_id(request.form.get("user-id")), "Usuário não encontrado"))
 
+        changed = False
         # Process password change
         password = request.form.get("password")
         c_password = request.form.get("confirm-password")
@@ -585,6 +569,7 @@ def users():
                 flash("As senhas não são iguais.")
                 return redirect(request.url)
             db.change_user_password(u_id, generate_password_hash(password))
+            changed = True
             flash("Senha alterada com sucesso!")
 
         # Process username change
@@ -595,6 +580,7 @@ def users():
                 flash("Nome de usuário ja existe!")
                 return redirect(request.url)
             db.change_username(u_id, username)
+            changed = True
             flash("Nome de usuário alterado com sucesso!")
 
         # Process role change
@@ -606,9 +592,13 @@ def users():
                     flash("Você não pode tirar seu cargo de gerente.")
                 else:
                     db.change_user_role(u_id, role)
+                    changed = True
                     flash(f"Mudança de usuário {username} para {Filters.translate(role)} bem sucedida.")
             else:
                 return apology("Algo deu errado com a mudança de cargo")
+        if changed:
+            update_user_session(u_id)
+
         return redirect(request.url)
 
     # User reached route via get

@@ -402,8 +402,8 @@ def products_new_product():
             )
         except Exception as exception:
             return apology(f"Não foi possível registar o produto: \n{exception}")
-        flash(f"Produto registrado com sucesso")
-        return redirect("/products")
+        flash("Produto registrado com sucesso")
+        return redirect(request.url)
     # User reached route via get
     else:
         product_types = db.get_active_product_types()
@@ -427,8 +427,8 @@ def products_new_product_type():
             return apology(
                 f"Não foi possível registar o tipo de produto: \n{exception}"
             )
-        flash(f"Tipo de produto registrado com sucesso")
-        return redirect("/products")
+        flash("Tipo de produto registrado com sucesso")
+        return redirect(request.url)
         # User reached route via get
     else:
         return render_template("new-product-type.html")

@@ -9,12 +9,10 @@ import preferences
 # Configure application
 app = Flask(__name__)
 
-# TODO: Move configuration to another file
-# Custom filter
+# Custom filters
 app.jinja_env.filters["brl"] = Filters.brl
 app.jinja_env.filters["translate"] = Filters.translate
 
-# TODO: Update session filesystem to a modern one
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_PERMANENT"] = True
@@ -22,7 +20,6 @@ app.config["PERMANENT_SESSION_LIFETIME"] = 604800  # 7 days in seconds
 Session(app)
 
 
-# TODO: understand what this means
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -32,7 +29,7 @@ def after_request(response):
     return response
 
 
-# Close database connection
+# Close database connection after request is completed
 @app.teardown_appcontext
 def teardown_appcontext(exception=None):
     db.close_db_connection(exception)

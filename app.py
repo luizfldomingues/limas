@@ -565,8 +565,18 @@ def users():
             u_id = u_id['id']
         else:
             return apology((request.form, db.get_user_by_id(request.form.get("user-id")), "Usuário não encontrado"))
-
         changed = False
+        # Process user status
+        user_status = request.form.get("user-status")
+        old_status = request.form.get("old-status")
+        if user_status and old_status and user_status != old_status and user_status in ("active", "inactive"):
+            if u_id == session.get("user_id"):
+                flash("Você não pode desativar seu próprio usuário.")
+                return redirect(request.url)
+            db.change_user_status(u_id, user_status)
+            flash("Status alterado com sucesso")
+            changed = True
+
         # Process password change
         password = request.form.get("password")
         c_password = request.form.get("confirm-password")
@@ -614,5 +624,10 @@ def users():
             if not user:
                 return apology("Usuário não encontrado")
             return render_template("user.html", user=user)
-        return render_template("users.html", users=db.get_users())
+        inactive = False
+        status=("active",)
+        if request.args.get("status") == "inactive":
+            inactive = True
+            status=("inactive",)
+        return render_template("users.html", users=db.get_users(user_status=status), inactive=inactive)
 

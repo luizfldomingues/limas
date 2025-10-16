@@ -341,12 +341,13 @@ class Database:
             (username, password_hash),
         )
 
-    def get_users(self, roles=('manager', 'staff')):
+    def get_users(self, roles=('manager', 'staff'), user_status=('active', 'inactive')):
         """Retrieves all of the users and their information"""
         return self._fetchall_query(
             "SELECT * FROM users "
-            f"WHERE role IN ({placeholders(len(roles))})",
-            roles
+            f"WHERE role IN ({placeholders(len(roles))}) "
+            f"AND user_status IN ({placeholders(len(user_status))})",
+            roles + user_status
         )
 
     def get_user_by_id(self, user_id):
@@ -389,6 +390,15 @@ class Database:
             "SET role = ? "
             "WHERE id = ?",
             (new_role, user_id)
+        )
+
+    def change_user_status(self, user_id, new_status):
+        """ Change the status of a user """
+        return self._execute_query(
+            "UPDATE users "
+            "SET user_status = ? "
+            "WHERE id = ?",
+            (new_status, user_id)
         )
 
     def change_user_session_id(self, user_id, new_id):

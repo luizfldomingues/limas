@@ -8,36 +8,10 @@ Usuários
 {% endblock %}
 
 {% block main %}
-<div class="py-1 my-1">
-  <div class="mb-3">
-    <h3>Usuários</h3>
-  </div>
-  <div>
-    <table class="table table-bordered table-striped">
-      <thead>
-        <tr class="table-primary">
-          <td>ID</td>
-          <td>Username</td>
-          <td>Privilégio</td>
-          <td>Opções</td>
-        </tr>
-      </thead>
-      <tbody>
-        {% for user in users %}
-        <tr>
-          <td>{{ user.id }}</td>
-          <td>{{ user.username }}</td>
-          <td>{{ user.role | translate | capitalize }}</td>
-          <td>
-            <form action="/users" method="get">
-                <input type="hidden" name="user-id" value="{{ user.id }}">
-                <button class="border btn btn-secondary" type="submit">...</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
+{% from "macros.html" import users_menu %}
+{% if not inactive %}
+{{ users_menu(users=users, color="primary", status="active", inactive=False) }}
+{% else %}
+{{ users_menu(users=users, color="warning", status="inactive", inactive=True) }}
+{% endif %}
 {% endblock %}

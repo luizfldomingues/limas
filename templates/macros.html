@@ -119,6 +119,20 @@
                             </select>
                         </div>
                     </td>
+                </tr>
+                <tr>
+                    <td>Situação</td>
+                    <td>
+                        <div>
+                            <input name="old-status" type="hidden" value="{{ user.user_status }}">
+                            <select class="form-control" name="user-status">
+                                {% for status in ("active", "inactive") %}
+                                <option {% if status == user.user_status %}selected{% endif %} value="{{ status }}">{{ status | translate | capitalize }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </td>
+                </tr>
                 <tr>
                     <td>Senha</td>
                     <td>
@@ -144,5 +158,56 @@
             </tfoot>
         </table>
     </form>
+</div>
+{% endmacro %}
+
+{% macro users_menu(users, color, status, inactive) %}
+<div class="py-1 my-1">
+  <div class="mb-3">
+    <h3>Usuários {{ status | translate}}s</h3>
+  </div>
+  <div>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr class="table-{{ color }}">
+          <td>ID</td>
+          <td>Username</td>
+          <td>Privilégio</td>
+          <td>Opções</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.role | translate | capitalize }}</td>
+          <td>
+            <form action="/users" method="get">
+                <input type="hidden" name="user-id" value="{{ user.id }}">
+                <button class="border btn btn-secondary" type="submit">...</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+  {% if not inactive %}
+  <form action="/users" method="get">
+    <div>
+      <input type="hidden" name="status" value="inactive">
+      <button class="border btn btn-warning" type="submit">Gerenciar os inativos</button>
+    </div>
+  </form>
+  {% else %}
+  <form action="/users" method="get">
+    <div>
+      <button class="border btn btn-primary" type="submit">Gerenciar os ativos</button>
+    </div>
+  </form>
+  {% endif %}
 </div>
 {% endmacro %}

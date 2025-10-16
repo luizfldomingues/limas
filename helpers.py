@@ -24,6 +24,8 @@ class Filters:
         translations = {
             'staff': 'colaborador',
             'manager': 'gerente',
+            'active': 'ativo',
+            'inactive': 'inativo',
         }
         try:
             return translations[word]
@@ -47,13 +49,15 @@ def login_session(session, password, user_id=None, username=None):
     elif username is not None:
         try:
             user = db.get_user_by_username(username)[0]
-            print(user)
         except IndexError:
             return None
     else:
         return None
 
     if not user:
+        return None
+
+    if user["user_status"] == "inactive":
         return None
 
     if not check_password_hash(pwhash=user["hash"], password=password):

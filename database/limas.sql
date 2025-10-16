@@ -16,7 +16,10 @@ CREATE TABLE products (
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     username TEXT NOT NULL UNIQUE,
-    hash TEXT NOT NULL
+    role TEXT CHECK (role IN ('manager', 'staff')) NOT NULL DEFAULT 'staff',
+    hash TEXT NOT NULL,
+    user_status TEXT CHECK (user_status IN ('active', 'inactive')) NOT NULL DEFAULT 'active',
+    session_id INT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE orders (

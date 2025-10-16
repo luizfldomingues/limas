@@ -2,6 +2,8 @@ import sqlite3
 import os
 from flask import session, g
 
+def placeholders(n=0):
+    return ", ".join(['?']*n)
 
 class Database:
     """Handles all database interactions for the Flask application."""
@@ -331,11 +333,28 @@ class Database:
         )
         return row["total"] if row else 0
 
-    def create_user(self, username, password_hash):
+    # User operations
+    def create_user(self, username, password_hash, role='staff'):
         """Creates a new user with a username and hashed password."""
         self._execute_query(
             "INSERT INTO users (username, hash) VALUES (?, ?)",
             (username, password_hash),
+        )
+
+    def get_users(self, roles=('manager', 'staff'), user_status=('active', 'inactive')):
+        """Retrieves all of the users and their information"""
+        return self._fetchall_query(
+            "SELECT * FROM users "
+            f"WHERE role IN ({placeholders(len(roles))}) "
+            f"AND user_status IN ({placeholders(len(user_status))})",
+            roles + user_status
+        )
+
+    def get_user_by_id(self, user_id):
+        return self._fetchone_query(
+            "SELECT * from users "
+            "WHERE id = ?",
+            (user_id,)
         )
 
     def get_user_id_by_username(self, username):
@@ -344,6 +363,52 @@ class Database:
             "SELECT id FROM users WHERE username = ?", (username,)
         )
         return row["id"] if row else None
+
+    def change_user_password(self, user_id, new_hash):
+        """Change the password of a user"""
+        return self._execute_query(
+            "UPDATE users "
+            "SET hash = ? "
+            "WHERE id = ?",
+            (new_hash, user_id)
+        )
+
+    def change_username(self, user_id, new_username):
+        """Change the username of a user
+           Assumes that there is not user with that username"""
+        return self._execute_query(
+            "UPDATE users "
+            "SET username = ? "
+            "WHERE id = ?",
+            (new_username, user_id)
+        )
+
+    def change_user_role(self, user_id, new_role):
+        """Changes the user role"""
+        return self._execute_query(
+            "UPDATE users "
+            "SET role = ? "
+            "WHERE id = ?",
+            (new_role, user_id)
+        )
+
+    def change_user_status(self, user_id, new_status):
+        """ Change the status of a user """
+        return self._execute_query(
+            "UPDATE users "
+            "SET user_status = ? "
+            "WHERE id = ?",
+            (new_status, user_id)
+        )
+
+    def change_user_session_id(self, user_id, new_id):
+        """ Changes the user session id to new_id """
+        return self._execute_query(
+            "UPDATE users "
+            "SET session_id = ? "
+            "WHERE id = ?",
+            (new_id, user_id)
+        )
 
     def get_sales_report(self, start_date, end_date):
         """Returns the total sales in the period and the sold products"""

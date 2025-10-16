@@ -136,7 +136,6 @@ def delete_order():
 @login_required
 def history():
     if request.args:
-        total_sold = 0
         date_range = request.args.get("date-range")
         if date_range.isdigit():
             since_date = db.get_date_since(date_range)
@@ -145,15 +144,11 @@ def history():
             orders = db.get_all_completed_orders()
             since_date = "Sempre"
         order_products = db.list_products(orders)
-        total_sold = 0
-        for order in orders:
-            total_sold += order["total"]
 
         return render_template(
             "history.html",
             orders=orders,
             order_products=order_products,
-            total=total_sold,
             since=since_date,
         )
     else:

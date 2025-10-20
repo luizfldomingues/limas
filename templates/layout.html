@@ -40,7 +40,8 @@
                       {% endif %}
                         </ul>
                         <ul class="navbar-nav ms-auto mt-2">
-                            <li class="nav-item"><a class="nav-link" href="/logout">Sair</a></li>
+                            <li class="nav-item"><p>Logado como {{ session["username"] }}<p></li>
+                            <li class="nav-item"><a class="nav-link" href="/logout">Sair ({{ session["username"] | capitalize }})</a></li>
                         </ul>
                     {% else %}
                         <ul class="navbar-nav ms-auto mt-2">

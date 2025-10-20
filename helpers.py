@@ -66,6 +66,7 @@ def login_session(session, password, user_id=None, username=None):
     session["user_id"] = user["id"]
     session["user_role"] = user["role"]
     session["session_id"] = user["session_id"]
+    session["username"] = user["username"]
     flash(f"Logado com sucesso como {user["username"]}.")
     return 1
 

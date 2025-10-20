@@ -1,71 +1,93 @@
-Lima's - A simple order and sales manager for dine-in establishments.
-=============================
+# Lima's Order Manager
 
-## Purpose
+A simple and efficient order and sales management system designed for dine-in establishments like restaurants, cafés, and ice cream shops.
 
-This project aims to be an efficient order manager for dine-in establishment, e.g., restaurants, icecream shops etc.
-I.e. it makes the life of establishment owners easier by handling the orders and sales management for them.
+## 🚀 Purpose
 
-## How to run
+Lima's aims to simplify daily operations for establishment owners by providing a centralized platform for handling orders, tracking sales, and managing users and products. The goal is to offer an intuitive interface that requires minimal training.
 
-After downloading the project files, make sure you have all dependencies installed. Read the dependency section for more informations.
+## ✨ Features
 
-To start running the application, execute in the project root folder:
-```bash
-flask run
-```
-Alternatively:
-```bash
-python3 -m flask run
-```
+* **Order Management:** Create, view, update, and complete active orders for different tables.
+* **Sales History:** Access a complete history of completed orders within a specified date range and reopen them if needed.
+* **Product Catalog:** (Admin) Add, edit, or remove products and categorize them by type.
+* **User Management:** (Admin) Manage user accounts and their roles within the system.
+* **Reporting:** (Admin) Generate sales reports for specific periods to gain insights into business performance.
 
-That is going to, by default, deploy your application locally on address 127.0.0.1:5000 (localhost:5000). You can access it via http on your local browser and start using.
+## 🛠️ Getting Started
 
-You can also add the flag --host=0.0.0.0 to run it on all addresses, including your local network, so it can be accessed by other devices in your local network.
+Follow these instructions to get a local copy up and running.
 
-## Dependencies
+### **Prerequisites**
 
-The project depends on some python packages, including cs50, flask, flask_session, werkzeug.security, matplotlib etc.
+* Python 3.x
+* pip
 
-In order to make it easier for you to execute the program, there's a requirements.txt file that can help you manage the python dependencies. The recommended way to use it is in a python venv.
+### **Installation & Setup**
 
-To create a python venv, activate it and install the dependencies, follow the steps bellow.
+1.  **Download the Project:**
+    Download or clone the project files to your local machine.
 
-Create the python venv and activate it (in the project root folder):
-```bash
-python -m venv .venv
-```
+2.  **Create and Activate a Virtual Environment:**
+    It's highly recommended to use a Python virtual environment. In the project's root directory, run:
 
-Then activate it:
-```bash
-source .venv/bin/activate
-```
+    ```bash
+    # Create the virtual environment
+    python -m venv .venv
 
-Now, you can install the dependencies in a python virtual environment from the requirements.txt file:
-```bash
-pip install -r requirements.txt
-```
+    # Activate it (Linux/macOS)
+    source .venv/bin/activate
+    ```
 
-This way, you should have all python dependencies installed.
+3.  **Install Dependencies:**
+    With the virtual environment active, install all required packages from the `requirements.txt` file.
 
-If you want to run the program again later, in another bash section, just active the virtual environment as shown above, and all dependencies will be as you left them in that environment, without affecting your other python sessions.
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## How to use
+4.  **Run the Application:**
+    Execute the following command to start the Flask development server:
 
-The project design's goal is to be the most intuitive as possible. Currently, all the app interface is written in Portuguese, because of the context it is originally meant to be used.
+    ```bash
+    flask run
+    ```
+    By default, the application will be available at **`http://127.0.0.1:5000`**.
 
-When acessing the app for the first time via browser, you will be redirected to a registration page. The first account registered is always an admin of the system.
+    > **Note:** To make the application accessible to other devices on your local network, use the following command:
+    > `flask run --host=0.0.0.0`
 
-If you are logged in, you can see the active orders in the main page (to go to the main page just click on lima's logo on the header from any page you are). To create a new order, you can click the link in the main page or on the header, shown as "novo pedido". You will be asked about the table number, customer name and the products of that order. After creating the new order, they will appear in the main page, where you can increment, edit, complete or see more details about the order (including deleting it).
+---
 
-There is a section for consulting the order history. You can access it from the header on "histórico". You will be asked for how long you want to see the history and then all the completed orders in that period will be shown. If you click to see an order details, you can also reopen it.
+## 📖 How to Use
 
-Specially, if you are a manager, you will have acess to the products page, where you can edit the products and their types, the reports page, where you can generate reports of your sales for a specified time period, and the users page, where you can manage the users of the system.
+The application is designed to be as intuitive as possible. **Please note that the user interface is currently in Portuguese.**
 
-By default, anyone that can access your app can create a new account. In order to change that, you can change the value of the variable allow_new_users in preferences.py to False.
+### **Initial Setup**
 
-## Demo
+* When you first access the application, you will be redirected to a registration page.
+* **The first user account created is automatically granted administrator privileges.**
 
-Here is a video presentation of the project:
+### **General Workflow**
+
+* **Dashboard:** The main page displays all currently active orders.
+* **Creating an Order:** Click on "Novo Pedido" in the header. You will be prompted to enter the table number, customer name, and select products.
+* **Managing Orders:** From the main page, you can add items to an order, edit it, mark it as complete, or view more details (including deletion).
+* **Order History:** The "Histórico" section allows you to view past orders and reopen them if necessary.
+
+### **Admin-Specific Functions**
+
+If you are logged in as an administrator, you will have access to additional pages:
+* **Products (`Produtos`):** Manage the product catalog.
+* **Reports (`Relatórios`):** Generate sales reports.
+* **Users (`Usuários`):** Manage system users.
+
+### **Configuration**
+
+To prevent new user registrations, you can change a setting in the code:
+1.  Open the file `preferences.py`.
+2.  Change the value of the `allow_new_users` variable to `False`.
+
+## 🎬 Showcase
 
 [![Limas - A simple order and sales manager for dine-in establishments](https://img.youtube.com/vi/0umzbZ7kjq8/0.jpg)](https://www.youtube.com/watch?v=0umzbZ7kjq8)

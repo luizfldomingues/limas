@@ -3,6 +3,7 @@ from flask_session import Session
 from werkzeug.security import generate_password_hash
 from database.database import db
 from helpers import Constants, apology, Filters, login_required, login_session, manager_only, update_user_session
+import graphs
 import preferences
 
 # Configure application
@@ -490,8 +491,9 @@ def reports():
     report = db.get_sales_report(
         request.args.get("start-date"), request.args.get("end-date")
     )
+    sales_hour_graph = graphs.hourly_report(report["sales_per_hour"])
     return render_template(
-        "report.html", start_date=start_date, end_date=end_date, report=report
+        "report.html", start_date=start_date, end_date=end_date, report=report, sales_hour_graph=sales_hour_graph,
     )
 
 

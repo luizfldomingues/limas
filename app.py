@@ -532,6 +532,9 @@ def register():
             if not confirmation:
                 flash("Digite uma confirmação de senha")
                 return redirect("/register")
+            if len(username) > 40:
+                flash("Nome de usuário excede 40 digitos")
+                return redirect("/register")
 
             # Verify if the password and confirmation match
             if not password == confirmation:

@@ -2,7 +2,16 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import generate_password_hash
 from database.database import db
-from helpers import Constants, apology, Filters, login_required, login_session, manager_only, update_user_session
+from helpers import (
+    Constants,
+    apology,
+    Filters,
+    login_required,
+    login_session,
+    manager_only,
+    update_user_session,
+)
+import graphs
 import preferences
 
 # Configure application
@@ -259,9 +268,7 @@ def products(status):
         product_types[c]["products"] = db.get_inactive_products_by_type(
             product_types[c]["id"]
         )
-    return render_template(
-        "products.html", product_types=product_types, status=status
-    )
+    return render_template("products.html", product_types=product_types, status=status)
 
 
 @app.route("/products/edit", methods=["GET", "POST"])
@@ -286,7 +293,10 @@ def products_edit():
             # Validate the new_values data
             if (
                 not new_values["name"]
-                or (type(new_values["price"]) is str and not new_values["price"].isnumeric())
+                or (
+                    type(new_values["price"]) is str
+                    and not new_values["price"].isnumeric()
+                )
                 or len(db.get_product_type_by_id(new_values["type"])) != 1
                 or new_values["status"] not in ["active", "inactive"]
             ):
@@ -490,8 +500,13 @@ def reports():
     report = db.get_sales_report(
         request.args.get("start-date"), request.args.get("end-date")
     )
+    sales_hour_graph = graphs.hourly_report(report["sales_per_hour"])
     return render_template(
-        "report.html", start_date=start_date, end_date=end_date, report=report
+        "report.html",
+        start_date=start_date,
+        end_date=end_date,
+        report=report,
+        sales_hour_graph=sales_hour_graph,
     )
 
 
@@ -517,6 +532,9 @@ def register():
             if not confirmation:
                 flash("Digite uma confirmação de senha")
                 return redirect("/register")
+            if len(username) > 40:
+                flash("Nome de usuário excede 40 digitos")
+                return redirect("/register")
 
             # Verify if the password and confirmation match
             if not password == confirmation:
@@ -532,7 +550,7 @@ def register():
             user = db.get_user_by_username(username)[0]
 
             # If the user is the first to be registered, he is a manager
-            if len(db.get_users()) == 0:
+            if len(db.get_users()) == 1:
                 db.change_user_role(user["id"], "manager")
 
             # Logs the user
@@ -557,14 +575,25 @@ def users():
         # Check if user exists
         u_id = db.get_user_by_id(request.form.get("user-id"))
         if u_id:
-            u_id = u_id['id']
+            u_id = u_id["id"]
         else:
-            return apology((request.form, db.get_user_by_id(request.form.get("user-id")), "Usuário não encontrado"))
+            return apology(
+                (
+                    request.form,
+                    db.get_user_by_id(request.form.get("user-id")),
+                    "Usuário não encontrado",
+                )
+            )
         changed = False
         # Process user status
         user_status = request.form.get("user-status")
         old_status = request.form.get("old-status")
-        if user_status and old_status and user_status != old_status and user_status in ("active", "inactive"):
+        if (
+            user_status
+            and old_status
+            and user_status != old_status
+            and user_status in ("active", "inactive")
+        ):
             if u_id == session.get("user_id"):
                 flash("Você não pode desativar seu próprio usuário.")
                 return redirect(request.url)
@@ -604,7 +633,9 @@ def users():
                 else:
                     db.change_user_role(u_id, role)
                     changed = True
-                    flash(f"Mudança de usuário {username} para {Filters.translate(role)} bem sucedida.")
+                    flash(
+                        f"Mudança de usuário {username} para {Filters.translate(role)} bem sucedida."
+                    )
             else:
                 return apology("Algo deu errado com a mudança de cargo")
         if changed:
@@ -620,9 +651,10 @@ def users():
                 return apology("Usuário não encontrado")
             return render_template("user.html", user=user)
         inactive = False
-        status=("active",)
+        status = ("active",)
         if request.args.get("status") == "inactive":
             inactive = True
-            status=("inactive",)
-        return render_template("users.html", users=db.get_users(user_status=status), inactive=inactive)
-
+            status = ("inactive",)
+        return render_template(
+            "users.html", users=db.get_users(user_status=status), inactive=inactive
+        )

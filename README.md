@@ -64,7 +64,8 @@ Specially, if you are a manager, you will have acess to the products page, where
 
 By default, anyone that can access your app can create a new account. In order to change that, you can change the value of the variable allow_new_users in preferences.py to False.
 
-## Showcase
+## Demo
 
-Here is a video presentation of the project
+Here is a video presentation of the project:
 
+[![Limas - A simple order and sales manager for dine-in establishments](https://img.youtube.com/vi/0umzbZ7kjq8/0.jpg)](https://www.youtube.com/watch?v=0umzbZ7kjq8)

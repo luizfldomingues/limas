@@ -532,7 +532,7 @@ def register():
             user = db.get_user_by_username(username)[0]
 
             # If the user is the first to be registered, he is a manager
-            if len(db.get_users()) == 0:
+            if len(db.get_users()) == 1:
                 db.change_user_role(user["id"], "manager")
 
             # Logs the user

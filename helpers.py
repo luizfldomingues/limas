@@ -75,10 +75,10 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
-            flash("Área exclusiva para usuários registrados.")
             return redirect("/login")
         user = db.get_user_by_id(session.get("user_id"))
         if not user:
+            session.clear()
             return apology("Usuário não encontrado no banco de dados")
         if not user["session_id"] == session.get("session_id"):
             session.clear()

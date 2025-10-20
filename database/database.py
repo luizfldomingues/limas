@@ -470,6 +470,23 @@ class Database:
                 )
             }
         )
+
+        report.update(
+            {
+                "sales_per_hour": self._fetchall_query(
+                    "SELECT SUM(op.current_price * op.quantity) sold, "
+                    "strftime('%H', DATETIME(oi.increment_time, '-3 hours')) hour "
+                    "FROM order_products op "
+                    "JOIN order_increments oi ON op.order_increment_id = oi.id "
+                    "WHERE op.order_id "
+                    f"IN (SELECT orders.id FROM orders {where_condition}) "
+                    "GROUP by hour "
+                    "ORDER BY hour",
+                    (start_date, end_date),
+                )
+            }
+        )
+
         return report
 
     def get_today(self):

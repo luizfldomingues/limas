@@ -18,10 +18,13 @@ class Database:
         """Initializes the database schema from an SQL script."""
         with open("database/limas.sql", "r") as sql_file:
             sql_script = sql_file.read()
+        with open("database/sample_products.sql", "r") as sample_products:
+            products_script = sample_products.read()
         with sqlite3.connect(self.db_path) as conn:
             conn.executescript(sql_script)
+            conn.executescript(products_script)
             conn.commit()
-            print("Novo banco de dados criado com sucesso")
+            print("Novo banco de dados criado com sucesso, incluindo produtos de teste")
 
     def _get_db_connection(self):
         """Returns the connection of the context"""

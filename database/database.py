@@ -455,6 +455,8 @@ class Database:
                 )
             }
         )
+
+        # Get the total sold by user
         report.update(
             {
                 "total_per_user": self._fetchall_query(
@@ -471,6 +473,7 @@ class Database:
             }
         )
 
+        # Get the total in the interval between first and last order time grouped by hour of day
         report.update(
             {
                 "sales_per_hour": self._fetchall_query(
@@ -482,6 +485,23 @@ class Database:
                     f"IN (SELECT orders.id FROM orders {where_condition}) "
                     "GROUP by hour "
                     "ORDER BY hour",
+                    (start_date, end_date),
+                )
+            }
+        )
+
+        # Get the total in the interval between first and last order time grouped by day of week
+        report.update(
+            {
+                "sales_per_weekday": self._fetchall_query(
+                    "SELECT SUM(op.current_price * op.quantity) sold, "
+                    "strftime('%w', DATETIME(oi.increment_time, '-3 hours')) weekday "
+                    "FROM order_products op "
+                    "JOIN order_increments oi ON op.order_increment_id = oi.id "
+                    "WHERE op.order_id "
+                    f"IN (SELECT orders.id FROM orders {where_condition}) "
+                    "GROUP by weekday "
+                    "ORDER BY weekday ",
                     (start_date, end_date),
                 )
             }

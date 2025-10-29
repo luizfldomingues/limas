@@ -79,6 +79,11 @@ Relatório
         </tbody>
       </table>
     </div>
+    {% if sales_hour_graph %}
+    <div class="container-fluid">
+    <img class="img-fluid" src='data:image/png;base64, {{ sales_hour_graph }}'/>
+    </div>
+    {% endif %}
   </div>
 {% else %}
 <div class="m-5">

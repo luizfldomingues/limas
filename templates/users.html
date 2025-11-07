@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Usuários
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+
+{% block main %}
+{% from "macros.html" import users_menu %}
+{% if not inactive %}
+{{ users_menu(users=users, color="primary", status="active", inactive=False) }}
+{% else %}
+{{ users_menu(users=users, color="warning", status="inactive", inactive=True) }}
+{% endif %}
+{% endblock %}

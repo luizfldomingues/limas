@@ -1,19 +1,26 @@
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 from database.database import db
-
-from helpers import apology, brl, login_required
+from helpers import (
+    Constants,
+    apology,
+    Filters,
+    login_required,
+    login_session,
+    manager_only,
+    update_user_session,
+)
+import graphs
 import preferences
 
 # Configure application
 app = Flask(__name__)
 
-# TODO: Move configuration to another file
-# Custom filter
-app.jinja_env.filters["brl"] = brl
+# Custom filters
+app.jinja_env.filters["brl"] = Filters.brl
+app.jinja_env.filters["translate"] = Filters.translate
 
-# TODO: Update session filesystem to a modern one
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_PERMANENT"] = True
@@ -21,7 +28,6 @@ app.config["PERMANENT_SESSION_LIFETIME"] = 604800  # 7 days in seconds
 Session(app)
 
 
-# TODO: understand what this means
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -31,7 +37,7 @@ def after_request(response):
     return response
 
 
-# Close database connection
+# Close database connection after request is completed
 @app.teardown_appcontext
 def teardown_appcontext(exception=None):
     db.close_db_connection(exception)
@@ -139,7 +145,6 @@ def delete_order():
 @login_required
 def history():
     if request.args:
-        total_sold = 0
         date_range = request.args.get("date-range")
         if date_range.isdigit():
             since_date = db.get_date_since(date_range)
@@ -148,15 +153,11 @@ def history():
             orders = db.get_all_completed_orders()
             since_date = "Sempre"
         order_products = db.list_products(orders)
-        total_sold = 0
-        for order in orders:
-            total_sold += order["total"]
 
         return render_template(
             "history.html",
             orders=orders,
             order_products=order_products,
-            total=total_sold,
             since=since_date,
         )
     else:
@@ -215,8 +216,7 @@ def increment_order():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if session.get("user_id"):
-        # Clear the user session
-        session.clear()
+        return redirect("/")
 
     # User reached route via POST:
     if request.method == "POST":
@@ -224,43 +224,35 @@ def login():
         password = request.form.get("password")
         # Verify if the username, password and confirmation were submited
         if not username:
-            flash("Digite um nome de usuário")
+            flash("Digite um nome de usuário.")
             return redirect("/login")
         if not password:
-            flash("Digite uma senha")
+            flash("Digite uma senha.")
             return redirect("/login")
 
         # Verifies if the user exist and password matches
-        user = db.get_user_by_username(username)
-        if len(user) != 1 or not check_password_hash(
-            user[0]["hash"], request.form.get("password")
-        ):
-            flash("Usuário ou senha incorretos")
+        if not login_session(session, password, username=username):
+            flash("Usuário ou senha incorretos.")
             return redirect("/login")
-
-        # If password hash matches, logs the user
-        session["user_id"] = user[0]["id"]
-        flash("Logado com sucesso!")
         return redirect("/")
+
     # User reached route via GET
     else:
         return render_template("login.html")
 
 
 @app.route("/logout")
+@login_required
 def logout():
     """Log user out"""
-
-    # Forget any user_id
     session.clear()
-
-    # Redirect user to login form
-    return redirect("/")
+    return redirect("/login")
 
 
 @app.route("/products/<status>")
 @app.route("/products", defaults={"status": "active"})
 @login_required
+@manager_only
 def products(status):
     if status == "active":
         product_types = db.get_product_types()
@@ -271,19 +263,17 @@ def products(status):
         return render_template(
             "products.html", product_types=product_types, status=status
         )
-    elif status == "inactive":
-        product_types = db.get_inactive_product_types()
-        for c in range(len(product_types)):
-            product_types[c]["products"] = db.get_inactive_products_by_type(
-                product_types[c]["id"]
-            )
-        return render_template(
-            "products.html", product_types=product_types, status=status
+    product_types = db.get_inactive_product_types()
+    for c in range(len(product_types)):
+        product_types[c]["products"] = db.get_inactive_products_by_type(
+            product_types[c]["id"]
         )
+    return render_template("products.html", product_types=product_types, status=status)
 
 
 @app.route("/products/edit", methods=["GET", "POST"])
 @login_required
+@manager_only
 def products_edit():
     """Edit a product or product type"""
     if request.method == "POST":
@@ -303,9 +293,12 @@ def products_edit():
             # Validate the new_values data
             if (
                 not new_values["name"]
-                or not new_values["price"].isnumeric()
+                or (
+                    type(new_values["price"]) is str
+                    and not new_values["price"].isnumeric()
+                )
                 or len(db.get_product_type_by_id(new_values["type"])) != 1
-                or not new_values["status"] in ["active", "inactive"]
+                or new_values["status"] not in ["active", "inactive"]
             ):
                 return apology("Algum dos valores enviados são incompatíveis")
             try:
@@ -364,18 +357,18 @@ def products_edit():
                 "edit-product.html", product=product, product_types=product_types
             )
         # Serve page for editing a product type
-        elif request.args.get("product-type-id"):
-            product_type = db.get_full_product_type_by_id(
-                request.args.get("product-type-id")
-            )
-            if len(product_type) != 1:
-                return apology("Tipo de produto não encontrado")
-            product_type = product_type[0]
-            return render_template("edit-product-type.html", product_type=product_type)
+        product_type = db.get_full_product_type_by_id(
+            request.args.get("product-type-id")
+        )
+        if len(product_type) != 1:
+            return apology("Tipo de produto não encontrado")
+        product_type = product_type[0]
+        return render_template("edit-product-type.html", product_type=product_type)
 
 
 @app.route("/products/new/product", methods=["GET", "POST"])
 @login_required
+@manager_only
 def products_new_product():
     if request.method == "POST":
         # User wants to create a new product
@@ -397,8 +390,8 @@ def products_new_product():
             )
         except Exception as exception:
             return apology(f"Não foi possível registar o produto: \n{exception}")
-        flash(f"Produto registrado com sucesso")
-        return redirect("/products")
+        flash("Produto registrado com sucesso")
+        return redirect(request.url)
     # User reached route via get
     else:
         product_types = db.get_active_product_types()
@@ -407,6 +400,7 @@ def products_new_product():
 
 @app.route("/products/new/product-type", methods=["GET", "POST"])
 @login_required
+@manager_only
 def products_new_product_type():
     if request.method == "POST":
         # User wants to create a new product type
@@ -421,8 +415,8 @@ def products_new_product_type():
             return apology(
                 f"Não foi possível registar o tipo de produto: \n{exception}"
             )
-        flash(f"Tipo de produto registrado com sucesso")
-        return redirect("/products")
+        flash("Tipo de produto registrado com sucesso")
+        return redirect(request.url)
         # User reached route via get
     else:
         return render_template("new-product-type.html")
@@ -497,6 +491,7 @@ def order_details():
 
 @app.route("/reports")
 @login_required
+@manager_only
 def reports():
     """Page for querying for sales reports"""
     if not request.args:
@@ -505,8 +500,13 @@ def reports():
     report = db.get_sales_report(
         request.args.get("start-date"), request.args.get("end-date")
     )
+    sales_hour_graph = graphs.hourly_report(report["sales_per_hour"])
     return render_template(
-        "report.html", start_date=start_date, end_date=end_date, report=report
+        "report.html",
+        start_date=start_date,
+        end_date=end_date,
+        report=report,
+        sales_hour_graph=sales_hour_graph,
     )
 
 
@@ -514,11 +514,11 @@ def reports():
 def register():
     """Register new users"""
     if session.get("user_id"):
-        # Clear the user session
-        session.clear()
+        return redirect("/")
+
     # User reached route via POST:
     if request.method == "POST":
-        if preferences.allow_new_users:
+        if preferences.allow_new_users or len(db.get_users()) == 0:
             username = request.form.get("username")
             password = request.form.get("password")
             confirmation = request.form.get("confirmation")
@@ -532,26 +532,129 @@ def register():
             if not confirmation:
                 flash("Digite uma confirmação de senha")
                 return redirect("/register")
+            if len(username) > 40:
+                flash("Nome de usuário excede 40 digitos")
+                return redirect("/register")
 
             # Verify if the password and confirmation match
             if not password == confirmation:
                 flash("As senhas não são iguais")
                 return redirect("/register")
             # Verify if the username already exist
-            try:
+            if len(db.get_user_by_username(username)) == 0:
                 db.create_user(username, generate_password_hash(password))
-            except:
+            else:
                 flash("Nome de usuário ja registrado")
                 return redirect("/register")
 
+            user = db.get_user_by_username(username)[0]
+
+            # If the user is the first to be registered, he is a manager
+            if len(db.get_users()) == 1:
+                db.change_user_role(user["id"], "manager")
+
             # Logs the user
-            uid = db.get_user_id_by_username(username)
-            session["user_id"] = uid
+            if not login_session(session, password=password, username=username):
+                return apology("Algo deu errado ao registar a sessão")
             flash("Registrado com sucesso!")
             return redirect("/")
+
         else:
             flash("Sistema não aberto para novos usuários")
             return redirect("/")
 
     else:
         return render_template("register.html")
+
+
+@app.route("/users", methods=["GET", "POST"])
+@login_required
+@manager_only
+def users():
+    if request.method == "POST":
+        # Check if user exists
+        u_id = db.get_user_by_id(request.form.get("user-id"))
+        if u_id:
+            u_id = u_id["id"]
+        else:
+            return apology(
+                (
+                    request.form,
+                    db.get_user_by_id(request.form.get("user-id")),
+                    "Usuário não encontrado",
+                )
+            )
+        changed = False
+        # Process user status
+        user_status = request.form.get("user-status")
+        old_status = request.form.get("old-status")
+        if (
+            user_status
+            and old_status
+            and user_status != old_status
+            and user_status in ("active", "inactive")
+        ):
+            if u_id == session.get("user_id"):
+                flash("Você não pode desativar seu próprio usuário.")
+                return redirect(request.url)
+            db.change_user_status(u_id, user_status)
+            flash("Status alterado com sucesso")
+            changed = True
+
+        # Process password change
+        password = request.form.get("password")
+        c_password = request.form.get("confirm-password")
+        if password and c_password:
+            if password != c_password:
+                flash("As senhas não são iguais.")
+                return redirect(request.url)
+            db.change_user_password(u_id, generate_password_hash(password))
+            changed = True
+            flash("Senha alterada com sucesso!")
+
+        # Process username change
+        username = request.form.get("username")
+        old_username = request.form.get("old-username")
+        if username and username != old_username:
+            if db.get_user_by_username(username):
+                flash("Nome de usuário ja existe!")
+                return redirect(request.url)
+            db.change_username(u_id, username)
+            changed = True
+            flash("Nome de usuário alterado com sucesso!")
+
+        # Process role change
+        role = request.form.get("role")
+        old_role = request.form.get("old-role")
+        if role and role != old_role:
+            if role in (Constants.roles):
+                if u_id == session.get("user_id"):
+                    flash("Você não pode tirar seu cargo de gerente.")
+                else:
+                    db.change_user_role(u_id, role)
+                    changed = True
+                    flash(
+                        f"Mudança de usuário {username} para {Filters.translate(role)} bem sucedida."
+                    )
+            else:
+                return apology("Algo deu errado com a mudança de cargo")
+        if changed:
+            update_user_session(u_id)
+
+        return redirect(request.url)
+
+    # User reached route via get
+    else:
+        if request.args.get("user-id"):
+            user = db.get_user_by_id(request.args.get("user-id"))
+            if not user:
+                return apology("Usuário não encontrado")
+            return render_template("user.html", user=user)
+        inactive = False
+        status = ("active",)
+        if request.args.get("status") == "inactive":
+            inactive = True
+            status = ("inactive",)
+        return render_template(
+            "users.html", users=db.get_users(user_status=status), inactive=inactive
+        )

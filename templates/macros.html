@@ -1,4 +1,18 @@
 {% macro edit_order(action, products, edit_customer_info=False, order=False, color="primary", confirm_button="Confirmar") %}
+    <script src="/static/js/filter-products.js"></script>
+
+    <div class="input-group mb-3">
+      <input type="text"
+      class="form-control" 
+      placeholder="Pesquisar produtos" 
+      aria-label="Pesquisar produtos" 
+      aria-describedby="basic-addon2"
+      id="filter-products-button">
+      <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button">Limpar</button>
+      </div>
+    </div>
+
     <form action="{{ action }}" method="post">
         {% if order %}
         <span>
@@ -41,7 +55,7 @@
                 </thead>
                 {% endif %}
             {% for type in products %}
-                <tbody class="thead">
+            <tbody class="thead product-type-body" data-type-id="{{ type.id }}" data-type-name="{{ type.type | lower }}">
                     <tr>
                         <th colspan="3">{{ type.type | capitalize }}</th>
                     </tr>
@@ -51,13 +65,18 @@
                         <th>Quantidade</th>
                     </tr>
                 </tbody>
-                <tbody>
+                <tbody class="product-type-body" data-type-id="{{ type.id }}" data-type-name="{{ type.type | lower }}">
                 {% for product in type.products %}
-                <tr>
+                <tr 
+                  class="product-row"
+                  data-product-id="{{ product.id }}",
+                  data-product-type-id="{{ type.id }}",
+                  data-product-name="{{ product.product_name | lower }}"
+                >
                     <td>{{product.product_name | capitalize }}</td>
                     <td>{{ product.price | brl }}</td>
                     <td>
-                            <div class="mx-auto" style="max-width: 4rem;">
+                        <div class="mx-auto" style="max-width: 4rem;">
                             <input class="form-control quantity-input" name="{{ product.id }}" style="max-width: 4rem;" type="number" min="0" data-price="{{ product.price }}">
                         </div>
                     </td>

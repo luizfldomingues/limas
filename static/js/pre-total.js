@@ -5,9 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function update_total() {
     let total = 0
-    console.log(quantities);
     for (quantity of quantities) {
-      console.log(quantity)
       total += quantity.value * quantity.dataset.price;
     }
     display_total.innerHTML = formatBRL(total);

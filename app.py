@@ -204,6 +204,7 @@ def increment_order():
             products.append(
                 {
                     "type": type["type_name"],
+                    "id": type["id"],
                     "products": db.get_products_by_type(type["id"]),
                 }
             )
@@ -457,7 +458,7 @@ def new_order():
     else:
         product_types = db.get_product_types()
         products = [
-            {"type": type["type_name"], "products": db.get_products_by_type(type["id"])}
+            {"type": type["type_name"], "id": type["id"], "products": db.get_products_by_type(type["id"])}
             for type in product_types
         ]
         return render_template("new-order.html", products=products)

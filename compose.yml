@@ -1,0 +1,11 @@
+
+services:
+  order_manager: 
+    build: ./app
+    image: limas:latest
+    user: "0:0"
+    volumes:
+      - ./data:/data:Z
+    ports:
+      - "5000:5000"
+    restart: unless-stopped

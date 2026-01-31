@@ -87,19 +87,23 @@ def login_required(f):
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get("user_id") is None:
-            return redirect("/login")
-        user = db.get_user_by_id(session.get("user_id"))
-        if not user:
+        try: 
+            if session.get("user_id") is None:
+                return redirect("/login")
+            user = db.get_user_by_id(session.get("user_id"))
+            if not user:
+                session.clear()
+                return apology("Usuário não encontrado no banco de dados")
+            if not user["session_id"] == session.get("session_id"):
+                session.clear()
+                flash(
+                    "Todas as suas sessões foram desconectadas. Por favor, entre novamente."
+                )
+                return redirect("/login")
+            return f(*args, **kwargs)
+        except Exception as _:
             session.clear()
-            return apology("Usuário não encontrado no banco de dados")
-        if not user["session_id"] == session.get("session_id"):
-            session.clear()
-            flash(
-                "Todas as suas sessões foram desconectadas. Por favor, entre novamente."
-            )
             return redirect("/login")
-        return f(*args, **kwargs)
 
     return decorated_function
 
